@@ -1,38 +1,38 @@
-function [SelectedFolders] = DeinterlaceEyes(varargin) %Restores signal to 60Hz field rate
-%For the model-1 cameras currently
+function [SelectedFolders] = DeinterlaceEars(varargin) %Restores signal to 60Hz field rate
+%For the model-2 cameras currently
 SelectedFolders = uigetfile_n_dir();
 SelectedFolders = SelectedFolders';
 
 for i = 1:length(SelectedFolders)
-    LeyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Leye_m*.mp4'));
-    for ii = 1:length(LeyeFiles{i,1})
-        if length(LeyeFiles{i,1}(ii).name) == 39
-            v_filesL{i,1} = strcat(LeyeFiles{i,1}(ii).folder,'\',LeyeFiles{i,1}(ii).name);
-        elseif length(LeyeFiles{i,1}(ii).name) == 34
-            v_filesL{i,1} = strcat(LeyeFiles{i,1}(ii).folder,'\',LeyeFiles{i,1}(ii).name);
+    LearFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Lear_m*.avi'));
+    for ii = 1:length(LearFiles{i,1})
+        if length(LearFiles{i,1}(ii).name) == 39
+            v_filesL{i,1} = strcat(LearFiles{i,1}(ii).folder,'\',LearFiles{i,1}(ii).name);
+        elseif length(LearFiles{i,1}(ii).name) == 34
+            v_filesL{i,1} = strcat(LearFiles{i,1}(ii).folder,'\',LearFiles{i,1}(ii).name);
         end
     end
-    ReyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Reye_m*.mp4'));
-    for ii = 1:length(ReyeFiles{i,1})
-        if length(ReyeFiles{i,1}(ii).name) == 39
-            v_filesR{i,1} = strcat(ReyeFiles{i,1}(ii).folder,'\',ReyeFiles{i,1}(ii).name);
-        elseif length(ReyeFiles{i,1}(ii).name) == 34
-            v_filesR{i,1} = strcat(ReyeFiles{i,1}(ii).folder,'\',ReyeFiles{i,1}(ii).name);
+    RearFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Rear_m*.avi'));
+    for ii = 1:length(RearFiles{i,1})
+        if length(RearFiles{i,1}(ii).name) == 39
+            v_filesR{i,1} = strcat(RearFiles{i,1}(ii).folder,'\',RearFiles{i,1}(ii).name);
+        elseif length(RearFiles{i,1}(ii).name) == 34
+             v_filesR{i,1} = strcat(RearFiles{i,1}(ii).folder,'\',RearFiles{i,1}(ii).name);
         end
     end
 end
 
 v_files = [v_filesL;v_filesR];
 
-for i = 1:length(v_files)                   %for all videos inputted,
+for i = 1:length(v_files)                   %for all videos found,
     
     showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_files)));
     disp(showthis)
-    
+        
     vid = VideoReader(v_files{i});          %get info
     
     [ImagesFolder] = DeinterlaceFrames(vid);%Deinterlace each frame
-
+    
     [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder);%Make a video with those frames
     NewNames{i} = NewName;
 end
@@ -56,26 +56,26 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
         for iframe = 1:n                        %generate deinterlaced frames
             frame = read(vid,iframe);
 
-            a = frame; %%%%%     odd scan lines     %%%%%
-            for iScan = 1:4:height
-                try
+            a = frame; %%%%%     even scan lines     %%%%%
+            for iScan = 3:4:height
                 a(iScan,:) = a(iScan-1,:);
-                catch
-                a(iScan,:) = a(iScan+1,:);
-                end
             end
-            for iScan = 2:4:height
+            for iScan = 4:4:height-1
                 a(iScan,:) = a(iScan+1,:);
             end
             filename = strcat('frame',[sprintf('%06d',iframe),'a','.png']);
             fullname = fullfile(pwd,filename);
             imwrite(a,fullname);
 
-            b = frame; %%%%%     even scan lines     %%%%%
-            for iScan = 3:4:height
+            b = frame; %%%%%     odd scan lines     %%%%%
+            for iScan = 1:4:height
+                try
                 b(iScan,:) = b(iScan-1,:);
+                catch
+                b(iScan,:) = b(iScan+1,:);
+                end
             end
-            for iScan = 4:4:height-1
+            for iScan = 2:4:height
                 b(iScan,:) = b(iScan+1,:);
             end
             filename = strcat('frame',[sprintf('%06d',iframe),'b','.png']);
@@ -84,8 +84,7 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
         end
     else
     end
-    
-    %"Blinds" version:
+            %"Blinds" version:
 %     for iframe = 1:n
 %         frame = read(vid,iframe);
 %         
@@ -103,11 +102,11 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
 %         fullname = fullfile(pwd,filename);
 %         imwrite(b,fullname);
 %     end
+
 end
 
-
 function [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder)
-    
+
     cd(vid.path)                            %go back to original vid folder
     VideoName = strsplit(vid.Name,'.');
     VideoName = VideoName{1};
@@ -130,3 +129,5 @@ function [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder)
     else
     end
 end
+
+

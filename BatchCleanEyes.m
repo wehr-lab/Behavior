@@ -3,9 +3,12 @@ function BatchCleanEyes(varargin)
 %them in a .mat file in the masterdir for use in calibrating PupilGeodesics
 
 cycle = {'Reye','Leye'};
-
-SelectedFolders = uigetfile_n_dir(pwd);
-SelectedFolders = SelectedFolders';
+if nargin == 2
+    SelectedFolders = varargin{2};
+else
+    SelectedFolders = uigetfile_n_dir();
+    SelectedFolders = SelectedFolders';
+end
 
 for c = 1:length(cycle)
     choice = cycle{c};

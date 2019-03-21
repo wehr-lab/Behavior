@@ -2,8 +2,12 @@ function BatchPupilGeodesics(varargin)
 LeyeRadius = varargin{1};
 ReyeRadius = varargin{2};
 
-SelectedFolders = uigetfile_n_dir(pwd);
-SelectedFolders = SelectedFolders';
+if nargin == 3
+    SelectedFolders = varargin{3};
+else
+    SelectedFolders = uigetfile_n_dir();
+    SelectedFolders = SelectedFolders';
+end
 
 for i = 1:length(SelectedFolders)
     cd(SelectedFolders{i})

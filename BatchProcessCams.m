@@ -1,7 +1,11 @@
 function BatchProcessCams(varargin)
-choice = varargin; %'eyes' and/or 'ears'
-SelectedFolders = uigetfile_n_dir(pwd);
-SelectedFolders = SelectedFolders';
+choice = varargin{1}; %'eyes' and/or 'ears'
+if nargin == 2
+    SelectedFolders = varargin{2};
+else
+    SelectedFolders = uigetfile_n_dir();
+    SelectedFolders = SelectedFolders';
+end
 
 for i = 1:length(SelectedFolders)
     cd(SelectedFolders{i})

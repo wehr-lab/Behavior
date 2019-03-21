@@ -12,18 +12,20 @@ function ProcessCams(varargin)
             end
             if length(Find.vid) > 1 
                 for i = 1:length(Find.vid)
-                    if length(Find.vid(i).name) == 38
+                    if length(Find.vid(i).name) == 38           %_mouse-
                         Sky.vid = Find.vid(i); %choose raw
-                    else
+                    elseif length(Find.vid(i).name) == 33       %_m
+                        Sky.vid = Find.vid(i); %choose raw
                     end
                 end
             end
         Find.csv = dir('Sky_mouse*.csv'); %timestamps & triggervalues from bonsai
             if length(Find.csv) > 1 
                 for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 38
+                    if length(Find.csv(i).name) == 38           %_mouse-
                         Sky.csv = Find.csv(i); %choose raw
-                    else
+                    elseif length(Find.csv(i).name) == 33       %_m
+                        Sky.csv = Find.csv(i); %choose raw
                     end
                 end
             end
@@ -99,9 +101,10 @@ function ProcessCams(varargin)
         Find.csv = dir('Leye_mouse*.csv'); %timestamps from bonsai
             if length(Find.csv) > 1 
                 for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
+                    if length(Find.csv(i).name) == 39           %_mouse-
                         Leye.csv = Find.csv(i); %choose raw
-                    else
+                    elseif length(Find.csv(i).name) == 34       %_m
+                        Leye.csv = Find.csv(i); %choose raw
                     end
                 end
             end
@@ -158,9 +161,10 @@ function ProcessCams(varargin)
         Find.csv = dir('Reye_mouse*.csv'); %timestamps from bonsai
             if length(Find.csv) > 1 
                 for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
+                    if length(Find.csv(i).name) == 39           %_mouse-
                         Reye.csv = Find.csv(i); %choose raw
-                    else
+                    elseif length(Find.csv(i).name) == 34       %_m
+                        Reye.csv = Find.csv(i); %choose raw
                     end
                 end
             end
@@ -222,9 +226,10 @@ function ProcessCams(varargin)
         Find.csv = dir('Rear_mouse*.csv'); %timestamps from bonsai
             if length(Find.csv) > 1 
                 for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
+                    if length(Find.csv(i).name) == 39           %_mouse-
                         Rear.csv = Find.csv(i); %choose raw
-                    else
+                    elseif length(Find.csv(i).name) == 34       %_m
+                        Rear.csv = Find.csv(i); %choose raw
                     end
                 end
             end
@@ -278,9 +283,10 @@ function ProcessCams(varargin)
         Find.csv = dir('Lear_mouse*.csv'); %timestamps from bonsai
             if length(Find.csv) > 1 
                 for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
+                    if length(Find.csv(i).name) == 39           %_mouse-
                         Lear.csv = Find.csv(i); %choose raw
-                    else
+                    elseif length(Find.csv(i).name) == 34       %_m
+                        Lear.csv = Find.csv(i); %choose raw
                     end
                 end
             end

@@ -3,9 +3,13 @@ function [v_files] = DeinterlacedV_list(varargin) %varargin = 'Leye','Reye',or'S
 %Do VibrissaeVectors first, so you don't have to regenerate image folder.
 
 choice = varargin{1};
+if nargin == 2
+    SelectedFolders = varargin{2};
+else
+    SelectedFolders = uigetfile_n_dir();
+    SelectedFolders = SelectedFolders';
+end
 
-SelectedFolders = uigetfile_n_dir(pwd);
-SelectedFolders = SelectedFolders';
 
 for i = 1:length(SelectedFolders)
     LeyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Leye_m*.mp4'));
@@ -49,7 +53,7 @@ if or(isequal(choice,'Leye'),isequal(choice,'Reye'))
 
         v_files{i,1} = NewName;
 
-        DeleteImagesFolder(ImagesFolder,NewName)
+%         DeleteImagesFolder(ImagesFolder,NewName)
     end
 elseif isequal(choice,'Sky')
     for i = 1:length(v_list)                   %for all videos inputted,
