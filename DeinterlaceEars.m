@@ -8,16 +8,12 @@ for i = 1:length(SelectedFolders)
     for ii = 1:length(LearFiles{i,1})
         if length(LearFiles{i,1}(ii).name) == 39
             v_filesL{i,1} = strcat(LearFiles{i,1}(ii).folder,'\',LearFiles{i,1}(ii).name);
-        elseif length(LearFiles{i,1}(ii).name) == 34
-            v_filesL{i,1} = strcat(LearFiles{i,1}(ii).folder,'\',LearFiles{i,1}(ii).name);
         end
     end
     RearFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Rear_m*.avi'));
     for ii = 1:length(RearFiles{i,1})
         if length(RearFiles{i,1}(ii).name) == 39
             v_filesR{i,1} = strcat(RearFiles{i,1}(ii).folder,'\',RearFiles{i,1}(ii).name);
-        elseif length(RearFiles{i,1}(ii).name) == 34
-             v_filesR{i,1} = strcat(RearFiles{i,1}(ii).folder,'\',RearFiles{i,1}(ii).name);
         end
     end
 end

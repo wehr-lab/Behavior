@@ -8,15 +8,11 @@ for i = 1:length(SelectedFolders)
     for ii = 1:length(LeyeFiles{i,1})
         if length(LeyeFiles{i,1}(ii).name) == 39
             v_filesL{i,1} = strcat(LeyeFiles{i,1}(ii).folder,'\',LeyeFiles{i,1}(ii).name);
-        elseif length(LeyeFiles{i,1}(ii).name) == 34
-            v_filesL{i,1} = strcat(LeyeFiles{i,1}(ii).folder,'\',LeyeFiles{i,1}(ii).name);
         end
     end
     ReyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Reye_m*.mp4'));
     for ii = 1:length(ReyeFiles{i,1})
         if length(ReyeFiles{i,1}(ii).name) == 39
-            v_filesR{i,1} = strcat(ReyeFiles{i,1}(ii).folder,'\',ReyeFiles{i,1}(ii).name);
-        elseif length(ReyeFiles{i,1}(ii).name) == 34
             v_filesR{i,1} = strcat(ReyeFiles{i,1}(ii).folder,'\',ReyeFiles{i,1}(ii).name);
         end
     end
