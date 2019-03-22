@@ -16,22 +16,22 @@ function CleanEye(varargin) %varargin = 'Leye'or'Reye'
 %         artifact = [LeyeTrack.artifact(1:stopframe,1),LeyeTrack.artifact(1:stopframe,2)];
         nasal = [LeyeTrack.nasal(1:stopframe,1),LeyeTrack.nasal(1:stopframe,2)];
         temporal = [LeyeTrack.temporal(1:stopframe,1),LeyeTrack.temporal(1:stopframe,2)];
-        p1 = [LeyeTrack.p1(1:stopframe,1),LeyeTrack.p1(1:stopframe,2)];
-        p2 = [LeyeTrack.p2(1:stopframe,1),LeyeTrack.p2(1:stopframe,2)];
-        p3 = [LeyeTrack.p3(1:stopframe,1),LeyeTrack.p3(1:stopframe,2)];
-        p4 = [LeyeTrack.p4(1:stopframe,1),LeyeTrack.p4(1:stopframe,2)];
-        p5 = [LeyeTrack.p5(1:stopframe,1),LeyeTrack.p5(1:stopframe,2)];
+        p1 = [LeyeTrack.pupil1(1:stopframe,1),LeyeTrack.pupil1(1:stopframe,2)];
+        p2 = [LeyeTrack.pupil2(1:stopframe,1),LeyeTrack.pupil2(1:stopframe,2)];
+        p3 = [LeyeTrack.pupil3(1:stopframe,1),LeyeTrack.pupil3(1:stopframe,2)];
+        p4 = [LeyeTrack.pupil4(1:stopframe,1),LeyeTrack.pupil4(1:stopframe,2)];
+        p5 = [LeyeTrack.pupil5(1:stopframe,1),LeyeTrack.pupil5(1:stopframe,2)];
         LED = [LeyeTrack.LED(1:stopframe,1),LeyeTrack.LED(1:stopframe,2)];
     elseif isequal(choice,'Reye')
         %Struct2matrices
 %         artifact = [ReyeTrack.artifact(1:stopframe,1),ReyeTrack.artifact(1:stopframe,2)];
         nasal = [ReyeTrack.nasal(1:stopframe,1),ReyeTrack.nasal(1:stopframe,2)];
         temporal = [ReyeTrack.temporal(1:stopframe,1),ReyeTrack.temporal(1:stopframe,2)];
-        p1 = [ReyeTrack.p1(1:stopframe,1),ReyeTrack.p1(1:stopframe,2)];
-        p2 = [ReyeTrack.p2(1:stopframe,1),ReyeTrack.p2(1:stopframe,2)];
-        p3 = [ReyeTrack.p3(1:stopframe,1),ReyeTrack.p3(1:stopframe,2)];
-        p4 = [ReyeTrack.p4(1:stopframe,1),ReyeTrack.p4(1:stopframe,2)];
-        p5 = [ReyeTrack.p5(1:stopframe,1),ReyeTrack.p5(1:stopframe,2)];
+        p1 = [ReyeTrack.pupil1(1:stopframe,1),ReyeTrack.pupil1(1:stopframe,2)];
+        p2 = [ReyeTrack.pupil2(1:stopframe,1),ReyeTrack.pupil2(1:stopframe,2)];
+        p3 = [ReyeTrack.pupil3(1:stopframe,1),ReyeTrack.pupil3(1:stopframe,2)];
+        p4 = [ReyeTrack.pupil4(1:stopframe,1),ReyeTrack.pupil4(1:stopframe,2)];
+        p5 = [ReyeTrack.pupil5(1:stopframe,1),ReyeTrack.pupil5(1:stopframe,2)];
         LED = [ReyeTrack.LED(1:stopframe,1),ReyeTrack.LED(1:stopframe,2)];
     end
 

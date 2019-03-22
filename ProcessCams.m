@@ -66,14 +66,7 @@ function ProcessCams(varargin)
         SkyTrack.csv = dir(temp);
             SkyTrack.raw = textscan(fopen(SkyTrack.csv.name),'%q');
             SkyTrack.raw = SkyTrack.raw{1};
-            SkyTrack.length = length(SkyTrack.raw)-3;
-            SkyTrack.Snout = dlmread(SkyTrack.csv.name,',',[3,1,SkyTrack.length,3]);
-            SkyTrack.Lear = dlmread(SkyTrack.csv.name,',',[3,4,SkyTrack.length,6]);
-            SkyTrack.Rear = dlmread(SkyTrack.csv.name,',',[3,7,SkyTrack.length,9]);
-            SkyTrack.Ptail = dlmread(SkyTrack.csv.name,',',[3,10,SkyTrack.length,12]);
-            SkyTrack.Dtail = dlmread(SkyTrack.csv.name,',',[3,13,SkyTrack.length,15]);
-            SkyTrack.Chead = dlmread(SkyTrack.csv.name,',',[3,16,SkyTrack.length,18]);
-            SkyTrack.Cbutt = dlmread(SkyTrack.csv.name,',',[3,19,SkyTrack.length,21]);
+            [SkyTrack] = readDLCOutput(SkyTrack);
 
             mo = Video_Player;
             waitfor(mo)
@@ -133,16 +126,8 @@ function ProcessCams(varargin)
         LeyeTrack.csv = dir(temp);
             LeyeTrack.raw = textscan(fopen(LeyeTrack.csv.name),'%q');
             LeyeTrack.raw = LeyeTrack.raw{1};
-            LeyeTrack.length = length(LeyeTrack.raw)-3;
-            LeyeTrack.p1 = dlmread(LeyeTrack.csv.name,',',[3,1,LeyeTrack.length+2,3]);
-            LeyeTrack.p2 = dlmread(LeyeTrack.csv.name,',',[3,4,LeyeTrack.length+2,6]);
-            LeyeTrack.p3 = dlmread(LeyeTrack.csv.name,',',[3,7,LeyeTrack.length+2,9]);
-            LeyeTrack.p4 = dlmread(LeyeTrack.csv.name,',',[3,10,LeyeTrack.length+2,12]);
-            LeyeTrack.p5 = dlmread(LeyeTrack.csv.name,',',[3,13,LeyeTrack.length+2,15]);
-            LeyeTrack.nasal = dlmread(LeyeTrack.csv.name,',',[3,16,LeyeTrack.length+2,18]);
-            LeyeTrack.temporal = dlmread(LeyeTrack.csv.name,',',[3,19,LeyeTrack.length+2,21]);
-            LeyeTrack.LED = dlmread(LeyeTrack.csv.name,',',[3,22,LeyeTrack.length+2,24]);
-%             LeyeTrack.artifact = dlmread(LeyeTrack.csv.name,',',[3,25,LeyeTrack.length+2,27]);
+            [LeyeTrack] = readDLCOutput(LeyeTrack);
+            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Eye
         Reye.vid = dir('Reye_mouse*Deinterlaced.avi');
             if length(Reye.vid) < 1
@@ -191,16 +176,7 @@ function ProcessCams(varargin)
         ReyeTrack.csv = dir(temp);
             ReyeTrack.raw = textscan(fopen(ReyeTrack.csv.name),'%q');
             ReyeTrack.raw = ReyeTrack.raw{1};
-            ReyeTrack.length = length(ReyeTrack.raw)-3;
-            ReyeTrack.p1 = dlmread(ReyeTrack.csv.name,',',[3,1,ReyeTrack.length+2,3]);
-            ReyeTrack.p2 = dlmread(ReyeTrack.csv.name,',',[3,4,ReyeTrack.length+2,6]);
-            ReyeTrack.p3 = dlmread(ReyeTrack.csv.name,',',[3,7,ReyeTrack.length+2,9]);
-            ReyeTrack.p4 = dlmread(ReyeTrack.csv.name,',',[3,10,ReyeTrack.length+2,12]);
-            ReyeTrack.p5 = dlmread(ReyeTrack.csv.name,',',[3,13,ReyeTrack.length+2,15]);
-            ReyeTrack.nasal = dlmread(ReyeTrack.csv.name,',',[3,16,ReyeTrack.length+2,18]);
-            ReyeTrack.temporal = dlmread(ReyeTrack.csv.name,',',[3,19,ReyeTrack.length+2,21]);
-            ReyeTrack.artifact = dlmread(ReyeTrack.csv.name,',',[3,22,ReyeTrack.length+2,24]);
-            ReyeTrack.LED = dlmread(ReyeTrack.csv.name,',',[3,25,ReyeTrack.length+2,27]);
+            [ReyeTrack] = readDLCOutput(ReyeTrack);
     end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EARs
@@ -254,13 +230,8 @@ function ProcessCams(varargin)
         RearTrack.csv = dir(temp);
             RearTrack.raw = textscan(fopen(RearTrack.csv.name),'%q');
             RearTrack.raw = RearTrack.raw{1};
-            RearTrack.length = length(RearTrack.raw)-3;
-            RearTrack.DorMed = dlmread(RearTrack.csv.name,',',[3,1,RearTrack.length+2,3]);
-            RearTrack.DorLat = dlmread(RearTrack.csv.name,',',[3,4,RearTrack.length+2,6]);
-            RearTrack.Dist = dlmread(RearTrack.csv.name,',',[3,7,RearTrack.length+2,9]);
-            RearTrack.VenLat = dlmread(RearTrack.csv.name,',',[3,10,RearTrack.length+2,12]);
-            RearTrack.VenMed = dlmread(RearTrack.csv.name,',',[3,13,RearTrack.length+2,15]);
-%             RearTrack.artifact = dlmread(RearTrack.csv.name,',',[3,16,RearTrack.length+2,18]);
+            [RearTrack] = readDLCOutput(RearTrack);
+            
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Ear
         Lear.vid = dir('Lear_mouse*Deinterlaced.avi');
             if length(Lear.vid) < 1
@@ -309,13 +280,8 @@ function ProcessCams(varargin)
         LearTrack.csv = dir(temp);
             LearTrack.raw = textscan(fopen(LearTrack.csv.name),'%q');
             LearTrack.raw = LearTrack.raw{1};
-            LearTrack.length = length(LearTrack.raw)-3;
-            LearTrack.DorMed = dlmread(LearTrack.csv.name,',',[3,1,LearTrack.length+2,3]);
-            LearTrack.DorLat = dlmread(LearTrack.csv.name,',',[3,4,LearTrack.length+2,6]);
-            LearTrack.Dist = dlmread(LearTrack.csv.name,',',[3,7,LearTrack.length+2,9]);
-            LearTrack.VenLat = dlmread(LearTrack.csv.name,',',[3,10,LearTrack.length+2,12]);
-            LearTrack.VenMed = dlmread(LearTrack.csv.name,',',[3,13,LearTrack.length+2,15]);
-%             LearTrack.artifact = dlmread(LearTrack.csv.name,',',[3,16,LearTrack.length+2,18]);
+            [LearTrack] = readDLCOutput(LearTrack);
+            
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Save
     clear temp;
@@ -326,6 +292,7 @@ function ProcessCams(varargin)
     clear testlength;
     clear stopframe;
     clear choice;
+    clear proceed;
     Behavior = strcat('Behavior', Sky.vid.name(4:34));
     save (Behavior)
 end

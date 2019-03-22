@@ -1,6 +1,6 @@
 function [SelectedFolders] = DeinterlaceEyes(varargin) %Restores signal to 60Hz field rate
 %For the model-1 cameras currently
-SelectedFolders = uigetfile_n_dir();
+SelectedFolders = uigetfile_n_dir(pwd);
 SelectedFolders = SelectedFolders';
 
 for i = 1:length(SelectedFolders)
