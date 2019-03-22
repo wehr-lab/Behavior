@@ -6,7 +6,7 @@ choice = varargin{1};
 if nargin == 2
     SelectedFolders = varargin{2};
 else
-    SelectedFolders = uigetfile_n_dir();
+    SelectedFolders = uigetfile_n_dir(pwd);
     SelectedFolders = SelectedFolders';
 end
 

@@ -5,7 +5,7 @@ ReyeRadius = varargin{2};
 if nargin == 3
     SelectedFolders = varargin{3};
 else
-    SelectedFolders = uigetfile_n_dir();
+    SelectedFolders = uigetfile_n_dir(pwd);
     SelectedFolders = SelectedFolders';
 end
 

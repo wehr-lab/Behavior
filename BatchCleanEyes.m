@@ -1,14 +1,13 @@
 function BatchCleanEyes(varargin)
 %Calls CleanEye in selected directories, then concatinates all the values and saves
 %them in a .mat file in the masterdir for use in calibrating PupilGeodesics
-
-cycle = {'Reye','Leye'};
-if nargin == 2
-    SelectedFolders = varargin{2};
-else
-    SelectedFolders = uigetfile_n_dir();
+try 
+    SelectedFolders = varargin{1};
+catch
+    SelectedFolders = uigetfile_n_dir(pwd);
     SelectedFolders = SelectedFolders';
 end
+cycle = {'Reye','Leye'};
 
 for c = 1:length(cycle)
     choice = cycle{c};
