@@ -1,4 +1,4 @@
-function [SelectedFolders] = DeinterlaceEyes(varargin) %Restores signal to 60Hz field rate
+function [SelectedFolders] = DeinterlaceEyes() %Restores signal to 60Hz field rate
 %For the model-1 cameras currently
 SelectedFolders = uigetfile_n_dir(pwd);
 SelectedFolders = SelectedFolders';
@@ -42,7 +42,8 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
     cd(vid.path)                            %go to video location
     ImagesFolder = strcat('Deinterlace_',VideoName);
     NewName = fullfile(pwd,strcat(VideoName,'Deinterlaced','.avi'));
-    if ~exist(NewName)
+    NewNameComp = fullfile(pwd,strcat(VideoName,'Deinterlaced','.mp4'));
+    if ~exist(NewName) && ~exist(NewNameComp)
         mkdir(ImagesFolder);  %make a new folder there
         cd(ImagesFolder);     %go inside folder
         n = vid.NumberOfFrames;
@@ -112,9 +113,11 @@ function [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder)
     imagePaths = {images.folder}';          %and paths for all images
     
     NewName = fullfile(pwd,strcat(VideoName,'Deinterlaced','.avi'));
-    if ~exist(NewName)
+    NewNameComp = fullfile(pwd,strcat(VideoName,'Deinterlaced','.mp4'));
+    if ~exist(NewName) && ~exist(NewNameComp)
         outputVideo = VideoWriter(NewName);
         outputVideo.FrameRate = (vid.FrameRate)*2;
+        outputVideo.Quality = 95;
         open(outputVideo)
 
         for ii = 1:length(imageNames)           %and write the new video there

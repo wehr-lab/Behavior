@@ -4,13 +4,13 @@ function ProcessCams(varargin)
 	cd(datadir)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sky
         Find.vid = dir('Sky_mouse*.avi'); %raw video from bonsai
-            if length(Find.vid) < 1 
-                Find.vid = dir('Sky_mouse*.mkv'); %or compressed video through FFmpeg
+            if length(Find.vid) < 1
+                Find.vid = dir('Sky_mouse*.mkv'); %or h265 compressed video through FFmpeg
             end
-            if length(Find.vid) < 1 
-                Find.vid = dir('Sky_mouse*.mp4'); %or compressed video through FFmpeg
+            if length(Find.vid) < 1
+                Find.vid = dir('Sky_mouse*.mp4'); %or h264 compressed video through FFmpeg
             end
-            if length(Find.vid) > 1 
+            if length(Find.vid) > 1
                 for i = 1:length(Find.vid)
                     if length(Find.vid(i).name) == 38
                         Sky.vid = Find.vid(i); %choose raw
@@ -18,7 +18,7 @@ function ProcessCams(varargin)
                 end
             end
         Find.csv = dir('Sky_mouse*.csv'); %timestamps & triggervalues from bonsai
-            if length(Find.csv) > 1 
+            if length(Find.csv) > 1
                 for i = 1:length(Find.csv)
                     if length(Find.csv(i).name) == 38
                         Sky.csv = Find.csv(i); %choose raw
@@ -73,8 +73,6 @@ function ProcessCams(varargin)
             load('stopframe.mat');
             delete('stopframe.mat');
             SkyTrack.skystop = stopframe;
-%             temp = dir('Results.csv');
-%             SkyTrack.CircleXYs = dlmread(temp.name,',',[1,5,3,7]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% EYEs
     [proceed] = IsAny(choice,'eyes');
@@ -82,13 +80,13 @@ function ProcessCams(varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Eye
         Leye.vid = dir('Leye_mouse*Deinterlaced.avi');
             if length(Leye.vid) < 1
-                Leye.vid = dir('Leye_mouse*Deinterlaced.mkv'); %or compressed video through FFmpeg
+                Leye.vid = dir('Leye_mouse*Deinterlaced.mkv'); %or h265 compressed video through FFmpeg
             end
-            if length(Leye.vid) < 1 
-                Leye.vid = dir('Leye_mouse*Deinterlaced.mp4'); %or compressed video through FFmpeg
+            if length(Leye.vid) < 1
+                Leye.vid = dir('Leye_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
         Find.csv = dir('Leye_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1 
+            if length(Find.csv) > 1
                 for i = 1:length(Find.csv)
                     if length(Find.csv(i).name) == 39
                         Leye.csv = Find.csv(i); %choose raw
@@ -131,14 +129,14 @@ function ProcessCams(varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Eye
         Reye.vid = dir('Reye_mouse*Deinterlaced.avi');
             if length(Reye.vid) < 1
-                Reye.vid = dir('Reye_mouse*Deinterlaced.mkv'); %or compressed video through FFmpeg
+                Reye.vid = dir('Reye_mouse*Deinterlaced.mkv'); %or h265 compressed video through FFmpeg
             end
-            if length(Reye.vid) < 1 
-                Reye.vid = dir('Reye_mouse*Deinterlaced.mp4'); %or compressed video through FFmpeg
+            if length(Reye.vid) < 1
+                Reye.vid = dir('Reye_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
             
         Find.csv = dir('Reye_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1 
+            if length(Find.csv) > 1
                 for i = 1:length(Find.csv)
                     if length(Find.csv(i).name) == 39
                         Reye.csv = Find.csv(i); %choose raw
@@ -185,14 +183,14 @@ function ProcessCams(varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Ear
         Rear.vid = dir('Rear_mouse*Deinterlaced.avi');
             if length(Rear.vid) < 1
-                Rear.vid = dir('Rear_mouse*Deinterlaced.mkv'); %or compressed video through FFmpeg
+                Rear.vid = dir('Rear_mouse*Deinterlaced.mkv'); %or h265 compressed video through FFmpeg
             end
-            if length(Rear.vid) < 1 
-                Rear.vid = dir('Rear_mouse*Deinterlaced.mp4'); %or compressed video through FFmpeg
+            if length(Rear.vid) < 1
+                Rear.vid = dir('Rear_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
             
         Find.csv = dir('Rear_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1 
+            if length(Find.csv) > 1
                 for i = 1:length(Find.csv)
                     if length(Find.csv(i).name) == 39
                         Rear.csv = Find.csv(i); %choose raw
@@ -235,14 +233,14 @@ function ProcessCams(varargin)
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Ear
         Lear.vid = dir('Lear_mouse*Deinterlaced.avi');
             if length(Lear.vid) < 1
-                Lear.vid = dir('Lear_mouse*Deinterlaced.mkv'); %or compressed video through FFmpeg
+                Lear.vid = dir('Lear_mouse*Deinterlaced.mkv'); %or h265 compressed video through FFmpeg
             end
-            if length(Lear.vid) < 1 
-                Lear.vid = dir('Lear_mouse*Deinterlaced.mp4'); %or compressed video through FFmpeg
+            if length(Lear.vid) < 1
+                Lear.vid = dir('Lear_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
             
         Find.csv = dir('Lear_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1 
+            if length(Find.csv) > 1
                 for i = 1:length(Find.csv)
                     if length(Find.csv(i).name) == 39
                         Lear.csv = Find.csv(i); %choose raw
