@@ -1,5 +1,6 @@
-function [v_files] = v_files4comp(varargin) %varargin = 'Sky','Eyes',and/or'Ears'
-%identifies all specified .avi videos to compress in SelectedFolders.(raw and Deinterlaced)
+function [v_string,v_files] = v_files4comp(varargin) %varargin = 'Sky','Eyes',and/or'Ears'
+%Identifies all .avi videos (raw and Deinterlaced) in selected folders
+%Returns string for input into compress_h264.py
 
 choice = varargin;
 SelectedFolders = uigetfile_n_dir(pwd);
@@ -59,8 +60,9 @@ if proceed == 1
 end
 
 v_list = [v_filesS;v_filesLeye;v_filesReye;v_filesLear;v_filesRear];
+v_files = [];
 for i = 1:length(v_list)
     v_files{i,1} = strrep(v_list{i},'\','\\');
 end
-[v_files] = CellArray2StringArray(v_files);
+[v_string] = v_files2string(v_files);
 end

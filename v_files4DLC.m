@@ -1,5 +1,5 @@
-function [v_files] = v_files4DLC(varargin) %varargin = 'Leye','Reye',or'Sky'
-%Returns specified videos for input into DLC.
+function [v_string,v_files] = v_files4DLC(varargin) %varargin = 'Leye','Reye',or'Sky'
+%Returns string of specified videos for input into DLC.
 
 choice = varargin{1};
 if nargin == 2
@@ -64,8 +64,6 @@ if ~isequal(choice,'Sky')                    %Deinterlaced videos
         showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_list)));
         disp(showthis)
 
-        clear NewName
-        clear ImagesFolder
         [ImagesFolder,NewName] = GetNewName(v_list{i});
 
         v_files{i,1} = NewName;
@@ -81,7 +79,7 @@ else
     end
 end
 
-[v_files] = CellArray2StringArray(v_files);
+[v_string] = v_files2string(v_files);
 end
 
 
@@ -96,7 +94,7 @@ function [ImagesFolder,NewName] = GetNewName(v_file)
     VideoName = VideoName{1};
     cd(vidpath)
     ImagesFolder = strcat('Deinterlace_',VideoName);
-    NewName = strcat(vidpath,strcat('\\',VideoName,'Deinterlaced','.avi'));
+    NewName = strcat(vidpath,strcat('\\',VideoName,'Deinterlaced','.mp4'));
 end
 
 function DeleteImagesFolder(ImagesFolder,NewName)

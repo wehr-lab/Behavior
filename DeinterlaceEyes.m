@@ -20,14 +20,14 @@ end
 
 v_files = [v_filesL;v_filesR];
 
-for i = 1:length(v_files)                   %for all videos inputted,
+for i = 1:length(v_files)                       %for all videos found,
     
     showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_files)));
     disp(showthis)
     
-    vid = VideoReader(v_files{i});          %get info
+    vid = VideoReader(v_files{i});              %get info
     
-    [ImagesFolder] = DeinterlaceFrames(vid);%Deinterlace each frame
+    [ImagesFolder] = DeinterlaceFrames(vid);    %Deinterlace each frame
 
     [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder);%Make a video with those frames
     NewNames{i} = NewName;
@@ -36,16 +36,19 @@ end
 disp('All finished!')
 end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%    Functions     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 function [ImagesFolder] = DeinterlaceFrames(vid)
     VideoName = strsplit(vid.Name,'.');
     VideoName = VideoName{1};
-    cd(vid.path)                            %go to video location
+    cd(vid.path)                                %go to video's directory
     ImagesFolder = strcat('Deinterlace_',VideoName);
     NewName = fullfile(pwd,strcat(VideoName,'Deinterlaced','.avi'));
     NewNameComp = fullfile(pwd,strcat(VideoName,'Deinterlaced','.mp4'));
     if ~exist(NewName) && ~exist(NewNameComp)
-        mkdir(ImagesFolder);  %make a new folder there
-        cd(ImagesFolder);     %go inside folder
+        mkdir(ImagesFolder);                    %make a new folder there
+        cd(ImagesFolder);                       %go inside folder
         n = vid.NumberOfFrames;
         height = vid.Height;
 
@@ -53,7 +56,7 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
         for iframe = 1:n                        %generate deinterlaced frames
             frame = read(vid,iframe);
 
-            a = frame; %%%%%     odd scan lines     %%%%%
+            a = frame;                   %%%%%     odd scan lines     %%%%%
             for iScan = 1:4:height
                 try
                 a(iScan,:) = a(iScan-1,:);
@@ -68,7 +71,7 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
             fullname = fullfile(pwd,filename);
             imwrite(a,fullname);
 
-            b = frame; %%%%%     even scan lines     %%%%%
+            b = frame;                  %%%%%     even scan lines     %%%%%
             for iScan = 3:4:height
                 b(iScan,:) = b(iScan-1,:);
             end
@@ -105,10 +108,10 @@ end
 
 function [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder)
     
-    cd(vid.path)                            %go back to original vid folder
+    cd(vid.path)                            %go back to vid directory
     VideoName = strsplit(vid.Name,'.');
     VideoName = VideoName{1};
-    images = dir(fullfile(ImagesFolder,'*.png'));    %now,
+    images = dir(fullfile(ImagesFolder,'*.png'));
     imageNames = {images.name}';            %get names
     imagePaths = {images.folder}';          %and paths for all images
     
@@ -120,7 +123,7 @@ function [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder)
         outputVideo.Quality = 95;
         open(outputVideo)
 
-        for ii = 1:length(imageNames)           %and write the new video there
+        for ii = 1:length(imageNames)           %and write new video
            img = imread(fullfile(imagePaths{ii},imageNames{ii}));
            writeVideo(outputVideo,img)
         end

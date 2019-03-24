@@ -1,4 +1,5 @@
 function BatchPupilGeodesics(varargin)
+
 LeyeRadius = varargin{1};
 ReyeRadius = varargin{2};
 
@@ -13,7 +14,6 @@ for i = 1:length(SelectedFolders)
     cd(SelectedFolders{i})
     PupilGeodesics('Leye',LeyeRadius);
     PupilGeodesics('Reye',ReyeRadius);
-
 end
 
 close all;

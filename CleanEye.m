@@ -13,7 +13,6 @@ function CleanEye(varargin) %varargin = 'Leye'or'Reye'
 
     if isequal(choice,'Leye')
         %Struct2matrices
-%         artifact = [LeyeTrack.artifact(1:stopframe,1),LeyeTrack.artifact(1:stopframe,2)];
         nasal = [LeyeTrack.nasal(1:stopframe,1),LeyeTrack.nasal(1:stopframe,2)];
         temporal = [LeyeTrack.temporal(1:stopframe,1),LeyeTrack.temporal(1:stopframe,2)];
         p1 = [LeyeTrack.pupil1(1:stopframe,1),LeyeTrack.pupil1(1:stopframe,2)];
@@ -24,7 +23,6 @@ function CleanEye(varargin) %varargin = 'Leye'or'Reye'
         LED = [LeyeTrack.LED(1:stopframe,1),LeyeTrack.LED(1:stopframe,2)];
     elseif isequal(choice,'Reye')
         %Struct2matrices
-%         artifact = [ReyeTrack.artifact(1:stopframe,1),ReyeTrack.artifact(1:stopframe,2)];
         nasal = [ReyeTrack.nasal(1:stopframe,1),ReyeTrack.nasal(1:stopframe,2)];
         temporal = [ReyeTrack.temporal(1:stopframe,1),ReyeTrack.temporal(1:stopframe,2)];
         p1 = [ReyeTrack.pupil1(1:stopframe,1),ReyeTrack.pupil1(1:stopframe,2)];

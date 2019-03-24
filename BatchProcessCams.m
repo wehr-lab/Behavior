@@ -1,4 +1,6 @@
 function BatchProcessCams(varargin)
+%Calls ProcessCams in selected directories
+
 choice = varargin{1}; %'eyes' and/or 'ears'
 if nargin == 2
     SelectedFolders = varargin{2};
