@@ -1,7 +1,7 @@
 function [Degenerates,Compressed,Untouched,Unknown] = v_files2check(varargin) %(v_string,'deletefiles')
 %Check if compression was successful. 
 
-if strlength(varargin{1}(2))<2                          %check if input is v_string or v_files
+if strlength(varargin{1}(2))<5                          %check if input is v_string or v_files
     [v_files] = v_string2files(varargin{1});
 else
     v_files = varargin{1};
@@ -18,7 +18,7 @@ Compressed = [];
 Untouched = [];
 Unknown = [];
 for i = 1:length(v_files)
-    rawfile = v_files(i);
+    rawfile = char(v_files(i));
     cmpfile = strrep(rawfile,'.avi','.mp4');
     
     if exist(rawfile) && exist(cmpfile)                 %if both exist, check their number of frames
