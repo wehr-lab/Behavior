@@ -26,14 +26,14 @@ for i = 1:length(v_files)
         cmpvid = VideoReader(cmpfile);
         
         if rawvid.NumberofFrames == cmpvid.NumberofFrames %if equal, add its name to Compressed, optionally delete rawfile
-            Compressed = [Compressed; rawfile];
+            Compressed = [Compressed; {rawfile}];
             if exist('deletefiles')
                 clear rawvid
                 delete(rawfile)
             end
             
         elseif rawvid.NumberofFrames ~= cmpvid.NumberofFrames %if different, add its name to Degenerates, optionally delete cmpfiles
-            Degenerates = [Degenerates; rawfile];
+            Degenerates = [Degenerates; {rawfile}];
             if exist('deletefiles')
                 clear cmpvid
                 delete(cmpfile)
@@ -42,10 +42,10 @@ for i = 1:length(v_files)
         end
         
     elseif ~exist(rawfile) && exist(cmpfile)            %if only compressed exists
-        Compressed = [Compressed; rawfile];
+        Compressed = [Compressed; {rawfile}];
     
     elseif exist(rawfile) && ~exist(cmpfile)            %if only raw exists
-        Untouched = [Untouched; rawfile];
+        Untouched = [Untouched; {rawfile}];
     
     elseif ~exist(rawfile) && ~exist(cmpfile)           %if neither exists... #git-blame'd
         disp('Just a moment...')
@@ -57,7 +57,7 @@ for i = 1:length(v_files)
         disp('The 9000 series has a perfect operational record.')
         disp('...')
         disp('Ive still got the greatest enthusiasm and confidence in the mission. And I want to help you.')
-        Unknown = [Unknown; rawfile];
+        Unknown = [Unknown; {rawfile}];
     end
     
 end
