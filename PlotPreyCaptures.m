@@ -5,6 +5,8 @@ masterdir = dirs{1};
 for i = 1:length(dirs)
     cd(dirs{i});
     Flow
+    RawCor('all');
+    RevCor('all');
 end
 cd(masterdir)
 end
