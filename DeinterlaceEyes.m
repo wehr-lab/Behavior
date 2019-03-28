@@ -84,25 +84,6 @@ function [ImagesFolder] = DeinterlaceFrames(vid)
         end
     else
     end
-    
-    %"Blinds" version:
-%     for iframe = 1:n
-%         frame = read(vid,iframe);
-%         
-%         a = frame; %%%%%     odd scan lines     %%%%%
-%         a(1:4:end,:) = 255;
-%         a(2:4:end,:) = 255;
-%         filename = strcat('frame',[sprintf('%06d',iframe),'a','.png']);
-%         fullname = fullfile(pwd,filename);
-%         imwrite(a,fullname);
-%         
-%         b = frame; %%%%%     even scan lines     %%%%%
-%         b(3:4:end,:) = 255;
-%         b(4:4:end,:) = 255;
-%         filename = strcat('frame',[sprintf('%06d',iframe),'b','.png']);
-%         fullname = fullfile(pwd,filename);
-%         imwrite(b,fullname);
-%     end
 end
 
 
