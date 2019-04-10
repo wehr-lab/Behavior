@@ -56,7 +56,7 @@ function ProcessCams(varargin)
             % trigger# checks in the future
             Sky.TTtimes = Sky.times(Sky.TTs,1);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sky Track
-        SkyTrack.vid = dir('Sky_mouseDeep*.mp4');
+        SkyTrack.vid = dir('Sky_mouse*labeled.mp4');
             temp = dir('temp-Sky_mouse*');
         SkyTrack.images = strcat(pwd,'\',temp.name);
             temp = Sky.vid.name;
@@ -108,7 +108,7 @@ function ProcessCams(varargin)
             Leye.Tdur = time(between(Leye.times(1),Leye.TTtimes,'time'));
             Leye.dur = time(between(Leye.times(1),Leye.times,'time'));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Eye Track
-        LeyeTrack.vid = dir('Leye_mouseDeep*.mp4');
+        LeyeTrack.vid = dir('Leye_mouse*labeled.mp4');
             if length(LeyeTrack.vid) > 1
                 for i = 1:length(LeyeTrack.vid)
                     testlength{i} = length(LeyeTrack.vid(i).name);
@@ -158,7 +158,7 @@ function ProcessCams(varargin)
             Reye.Tdur = time(between(Reye.times(1),Reye.TTtimes,'time'));
             Reye.dur = time(between(Reye.times(1),Reye.times,'time'));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Eye Track
-        ReyeTrack.vid = dir('Reye_mouseDeep*.mp4');
+        ReyeTrack.vid = dir('Reye_mouse*labeled.mp4');
             if length(ReyeTrack.vid) > 1
                 for i = 1:length(ReyeTrack.vid)
                     testlength{i} = length(ReyeTrack.vid(i).name);
@@ -212,7 +212,7 @@ function ProcessCams(varargin)
             Rear.Tdur = time(between(Rear.times(1),Rear.TTtimes,'time'));
             Rear.dur = time(between(Rear.times(1),Rear.times,'time'));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Ear Track
-        RearTrack.vid = dir('Rear_mouseDeep*.mp4');
+        RearTrack.vid = dir('Rear_mouse*labeled.mp4');
             if length(RearTrack.vid) > 1
                 for i = 1:length(RearTrack.vid)
                     testlength{i} = length(RearTrack.vid(i).name);
@@ -262,7 +262,7 @@ function ProcessCams(varargin)
             Lear.Tdur = time(between(Lear.times(1),Lear.TTtimes,'time'));
             Lear.dur = time(between(Lear.times(1),Lear.times,'time'));
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Ear Track
-        LearTrack.vid = dir('Lear_mouseDeep*.mp4');
+        LearTrack.vid = dir('Lear_mouse*labeled.mp4');
             if length(LearTrack.vid) > 1
                 for i = 1:length(LearTrack.vid)
                     testlength{i} = length(LearTrack.vid(i).name);

@@ -55,10 +55,37 @@ elseif isequal(choice,'Rear')
             end
         end
     end
+elseif isequal(choice,'Eye')
+    for i = 1:length(SelectedFolders)
+        EyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Eye_m*.mkv'));
+        for ii = 1:length(EyeFiles{i,1})
+            if length(EyeFiles{i,1}(ii).name) == 38
+                v_list{i,1} = strcat(EyeFiles{i,1}(ii).folder,'\',EyeFiles{i,1}(ii).name);
+            end
+        end
+    end
 end
 
+
 %%%%%%%%%%%%%%%% reformat '\' to '\\' %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if ~isequal(choice,'Sky')                    %Deinterlaced videos
+if isequal(choice,'Eye')                    %Deinterlaced videos
+    for i = 1:length(v_list) %for all videos inputted,
+
+        showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_list)));
+        disp(showthis)
+
+        v_files{i,1} = strrep(v_list{i},'\','\\');
+%         DeleteImagesFolder(ImagesFolder,NewName)
+    end
+elseif isequal(choice,'Sky')                                        
+    for i = 1:length(v_list) %for all videos inputted,
+
+        showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_list)));
+        disp(showthis)
+        
+        v_files{i,1} = strrep(v_list{i},'\','\\');
+    end    
+elseif ~isequal(choice,'Sky')                    %Deinterlaced videos
     for i = 1:length(v_list) %for all videos inputted,
 
         showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_list)));
@@ -68,14 +95,6 @@ if ~isequal(choice,'Sky')                    %Deinterlaced videos
 
         v_files{i,1} = NewName;
 %         DeleteImagesFolder(ImagesFolder,NewName)
-    end
-else                                        
-    for i = 1:length(v_list) %for all videos inputted,
-
-        showthis = strcat('Working on file:',num2str(i),'of',num2str(length(v_list)));
-        disp(showthis)
-        
-        v_files{i,1} = strrep(v_list{i},'\','\\');
     end
 end
 
