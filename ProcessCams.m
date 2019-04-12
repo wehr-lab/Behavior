@@ -409,6 +409,8 @@ function [Skyframe] = DI2Sky(varargin) %varargin = InputVid,DIframe
         Skyframe = frame;
     elseif abs(timebefortime)<abs(timeaftertime)
         Skyframe = frame-1;
+    elseif abs(timebefortime)==abs(timeaftertime)
+        Skyframe = frame-1;
     end
 
 end
