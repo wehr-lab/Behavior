@@ -1,34 +1,40 @@
 function ProcessCams(varargin)
-	choice = varargin; %'eyes' and/or 'ears'
-	datadir=pwd; %default to pwd
-	cd(datadir)
+	choice = varargin; %'eyes' and/or 'ears' and/or 'no_trigs'
+	[no_trigs] = IsAny(choice,'no_trigs');
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sky
-        Find.vid = dir('Sky_mouse*.avi'); %raw video from bonsai
-            if length(Find.vid) < 1
-                Find.vid = dir('Sky_mouse*.mkv'); %or h265 compressed video through FFmpeg
+        Sky.vid = dir('Sky_mouse*.avi'); %raw video from bonsai
+            if length(Sky.vid) < 1
+                Sky.vid = dir('Sky_mouse*.mkv'); %or h265 compressed video through FFmpeg
             end
-            if length(Find.vid) < 1
-                Find.vid = dir('Sky_mouse*.mp4'); %or h264 compressed video through FFmpeg
+            if length(Sky.vid) < 1
+                Sky.vid = dir('Sky_mouse*.mp4'); %or h264 compressed video through FFmpeg
             end
-            if length(Find.vid) > 1
-                for i = 1:length(Find.vid)
-                    if length(Find.vid(i).name) == 38
-                        Sky.vid = Find.vid(i); %choose raw
+            if length(Sky.vid) > 1
+                for i = 1:length(Sky.vid)
+                    if length(Sky.vid(i).name) == 38
+                        Sky.vid = Sky.vid(i); %choose raw
+                        break
                     end
                 end
             end
-        Find.csv = dir('Sky_mouse*.csv'); %timestamps & triggervalues from bonsai
-            if length(Find.csv) > 1
-                for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 38
-                        Sky.csv = Find.csv(i); %choose raw
+        Sky.csv = dir('Sky_mouse*.csv'); %timestamps & triggervalues from bonsai
+            if length(Sky.csv) > 1
+                for i = 1:length(Sky.csv)
+                    if length(Sky.csv(i).name) == 38
+                        Sky.csv = Sky.csv(i); %choose raw
+                        break
                     end
                 end
             end
             Sky.bonsai = textscan(fopen(Sky.csv.name),'%q');
             Sky.bonsai = Sky.bonsai{1,1}; %Timestamp and triggervalue
-
-            Sky.times = cell2mat(Sky.bonsai(1:2:end,:)); %SkyVid timestamps
+            
+            if no_trigs == 1
+                Sky.times = cell2mat(Sky.bonsai(1:end,:)); %SkyVid timestamps
+            else
+                Sky.times = cell2mat(Sky.bonsai(1:2:end,:)); %SkyVid timestamps
+            end
+            
             Sky.times = Sky.times(:,1:27);
             Sky.length = length(Sky.times);
             for i=1:Sky.length
@@ -36,25 +42,29 @@ function ProcessCams(varargin)
             end
             Sky.times = datetime(Sky.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
 
-            Sky.trigval = Sky.bonsai(2:2:end,:); %trigger values
-            Sky.trigs = find(~cellfun(@isempty,strfind(Sky.trigval,'True'))); %Framenumber for all triggered SkyCam frames
-            for i=1:length(Sky.trigs)
-                if i>1
-                    Sky.temp(i)=Sky.trigs(i)-Sky.trigs(i-1); %subtract previous trigger framenumber.
-                else
-                    Sky.temp(i)=90;
+            if no_trigs == 1
+                %do nothing
+            else
+                Sky.trigval = Sky.bonsai(2:2:end,:); %trigger values
+                Sky.trigs = find(~cellfun(@isempty,strfind(Sky.trigval,'True'))); %Framenumber for all triggered SkyCam frames
+                for i=1:length(Sky.trigs)
+                    if i>1
+                        Sky.temp(i)=Sky.trigs(i)-Sky.trigs(i-1); %subtract previous trigger framenumber.
+                    else
+                        Sky.temp(i)=90;
+                    end
                 end
+                Sky.temp2 = Sky.temp - ones(size(Sky.temp));
+                Sky.temp3 = find(Sky.temp2);
+                Sky.TTs = Sky.trigs(Sky.temp3(1,:),1);
+                Sky.TTslength = length(Sky.TTs);
+                Sky = rmfield(Sky,'temp');
+                Sky = rmfield(Sky,'temp2');
+                Sky = rmfield(Sky,'temp3');
+                % Safety measures. Should include a rigorous method for
+                % trigger# checks in the future
+                Sky.TTtimes = Sky.times(Sky.TTs,1);
             end
-            Sky.temp2 = Sky.temp - ones(size(Sky.temp));
-            Sky.temp3 = find(Sky.temp2);
-            Sky.TTs = Sky.trigs(Sky.temp3(1,:),1);
-            Sky.TTslength = length(Sky.TTs);
-            Sky = rmfield(Sky,'temp');
-            Sky = rmfield(Sky,'temp2');
-            Sky = rmfield(Sky,'temp3');
-            % Safety measures. Should include a rigorous method for
-            % trigger# checks in the future
-            Sky.TTtimes = Sky.times(Sky.TTs,1);
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Sky Track
         SkyTrack.vid = dir('Sky_mouse*labeled.mp4');
             temp = dir('temp-Sky_mouse*');
@@ -85,11 +95,12 @@ function ProcessCams(varargin)
             if length(Leye.vid) < 1
                 Leye.vid = dir('Leye_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
-        Find.csv = dir('Leye_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1
-                for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
-                        Leye.csv = Find.csv(i); %choose raw
+        Leye.csv = dir('Leye_mouse*.csv'); %timestamps from bonsai
+            if length(Leye.csv) > 1
+                for i = 1:length(Leye.csv)
+                    if length(Leye.csv(i).name) == 39
+                        Leye.csv = Leye.csv(i); %choose raw
+                        break
                     end
                 end
             end
@@ -101,12 +112,23 @@ function ProcessCams(varargin)
                 Leye.times(i,:) = strrep(Leye.times(i,:),'T','_');
             end
             Leye.times = datetime(Leye.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
-            for i=1:Sky.TTslength
-                Leye.TTs(i) = find(Sky.TTtimes(i)<Leye.times, 1); %framenumber of triggered EyeCam
+            
+            if no_trigs == 1
+                %do nothing
+            else
+                for i=1:Sky.TTslength
+                    Leye.TTs(i) = find(Sky.TTtimes(i)<Leye.times, 1); %framenumber of triggered EyeCam
+                end
+                Leye.TTtimes = Leye.times(Leye.TTs);
+                Leye.Tdur = time(between(Leye.times(1),Leye.TTtimes,'time'));
+                Leye.dur = time(between(Leye.times(1),Leye.times,'time'));
             end
-            Leye.TTtimes = Leye.times(Leye.TTs);
-            Leye.Tdur = time(between(Leye.times(1),Leye.TTtimes,'time'));
-            Leye.dur = time(between(Leye.times(1),Leye.times,'time'));
+            
+            Leye.skysync = [];
+            for i = 1:Leye.length
+                [Skyframe] = DI2Sky(Leye,i,Sky);
+                Leye.skysync = [Leye.skysync;Skyframe;Skyframe];
+            end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Eye Track
         LeyeTrack.vid = dir('Leye_mouse*labeled.mp4');
             if length(LeyeTrack.vid) > 1
@@ -135,11 +157,12 @@ function ProcessCams(varargin)
                 Reye.vid = dir('Reye_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
             
-        Find.csv = dir('Reye_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1
-                for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
-                        Reye.csv = Find.csv(i); %choose raw
+        Reye.csv = dir('Reye_mouse*.csv'); %timestamps from bonsai
+            if length(Reye.csv) > 1
+                for i = 1:length(Reye.csv)
+                    if length(Reye.csv(i).name) == 39
+                        Reye.csv = Reye.csv(i); %choose raw
+                        break
                     end
                 end
             end
@@ -151,12 +174,23 @@ function ProcessCams(varargin)
                 Reye.times(i,:) = strrep(Reye.times(i,:),'T','_');
             end
             Reye.times = datetime(Reye.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
-            for i=1:Sky.TTslength
-                Reye.TTs(i) = find(Sky.TTtimes(i)<Reye.times, 1); %framenumber of triggered EyeCam
+            
+            if no_trigs == 1
+                %do nothing
+            else
+                for i=1:Sky.TTslength
+                    Reye.TTs(i) = find(Sky.TTtimes(i)<Reye.times, 1); %framenumber of triggered EyeCam
+                end
+                Reye.TTtimes = Reye.times(Reye.TTs);
+                Reye.Tdur = time(between(Reye.times(1),Reye.TTtimes,'time'));
+                Reye.dur = time(between(Reye.times(1),Reye.times,'time'));
             end
-            Reye.TTtimes = Reye.times(Reye.TTs);
-            Reye.Tdur = time(between(Reye.times(1),Reye.TTtimes,'time'));
-            Reye.dur = time(between(Reye.times(1),Reye.times,'time'));
+            
+            Reye.skysync = [];
+            for i = 1:Reye.length
+                [Skyframe] = DI2Sky(Reye,i,Sky);
+                Reye.skysync = [Reye.skysync;Skyframe;Skyframe];
+            end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Eye Track
         ReyeTrack.vid = dir('Reye_mouse*labeled.mp4');
             if length(ReyeTrack.vid) > 1
@@ -189,11 +223,12 @@ function ProcessCams(varargin)
                 Rear.vid = dir('Rear_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
             
-        Find.csv = dir('Rear_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1
-                for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
-                        Rear.csv = Find.csv(i); %choose raw
+        Rear.csv = dir('Rear_mouse*.csv'); %timestamps from bonsai
+            if length(Rear.csv) > 1
+                for i = 1:length(Rear.csv)
+                    if length(Rear.csv(i).name) == 39
+                        Rear.csv = Rear.csv(i); %choose raw
+                        break
                     end
                 end
             end
@@ -205,12 +240,23 @@ function ProcessCams(varargin)
                 Rear.times(i,:) = strrep(Rear.times(i,:),'T','_');
             end
             Rear.times = datetime(Rear.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
-            for i=1:Sky.TTslength
-                Rear.TTs(i) = find(Sky.TTtimes(i)<Rear.times, 1); %framenumber of triggered EarCam
+            
+            if no_trigs == 1
+                %do nothing
+            else
+                for i=1:Sky.TTslength
+                    Rear.TTs(i) = find(Sky.TTtimes(i)<Rear.times, 1); %framenumber of triggered EarCam
+                end
+                Rear.TTtimes = Rear.times(Rear.TTs);
+                Rear.Tdur = time(between(Rear.times(1),Rear.TTtimes,'time'));
+                Rear.dur = time(between(Rear.times(1),Rear.times,'time'));
             end
-            Rear.TTtimes = Rear.times(Rear.TTs);
-            Rear.Tdur = time(between(Rear.times(1),Rear.TTtimes,'time'));
-            Rear.dur = time(between(Rear.times(1),Rear.times,'time'));
+            
+            Rear.skysync = [];
+            for i = 1:Rear.length
+                [Skyframe] = DI2Sky(Rear,i,Sky);
+                Rear.skysync = [Rear.skysync;Skyframe;Skyframe];
+            end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Right Ear Track
         RearTrack.vid = dir('Rear_mouse*labeled.mp4');
             if length(RearTrack.vid) > 1
@@ -239,11 +285,12 @@ function ProcessCams(varargin)
                 Lear.vid = dir('Lear_mouse*Deinterlaced.mp4'); %or h264 compressed video through FFmpeg
             end
             
-        Find.csv = dir('Lear_mouse*.csv'); %timestamps from bonsai
-            if length(Find.csv) > 1
-                for i = 1:length(Find.csv)
-                    if length(Find.csv(i).name) == 39
-                        Lear.csv = Find.csv(i); %choose raw
+        Lear.csv = dir('Lear_mouse*.csv'); %timestamps from bonsai
+            if length(Lear.csv) > 1
+                for i = 1:length(Lear.csv)
+                    if length(Lear.csv(i).name) == 39
+                        Lear.csv = Lear.csv(i); %choose raw
+                        break
                     end
                 end
             end
@@ -255,12 +302,23 @@ function ProcessCams(varargin)
                 Lear.times(i,:) = strrep(Lear.times(i,:),'T','_');
             end
             Lear.times = datetime(Lear.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
-            for i=1:Sky.TTslength
-                Lear.TTs(i) = find(Sky.TTtimes(i)<Lear.times, 1); %framenumber of triggered EarCam
+            
+            if no_trigs == 1
+                %do nothing
+            else
+                for i=1:Sky.TTslength
+                    Lear.TTs(i) = find(Sky.TTtimes(i)<Lear.times, 1); %framenumber of triggered EarCam
+                end
+                Lear.TTtimes = Lear.times(Lear.TTs);
+                Lear.Tdur = time(between(Lear.times(1),Lear.TTtimes,'time'));
+                Lear.dur = time(between(Lear.times(1),Lear.times,'time'));
             end
-            Lear.TTtimes = Lear.times(Lear.TTs);
-            Lear.Tdur = time(between(Lear.times(1),Lear.TTtimes,'time'));
-            Lear.dur = time(between(Lear.times(1),Lear.times,'time'));
+            
+            Lear.skysync = [];
+            for i = 1:Lear.length
+                [Skyframe] = DI2Sky(Lear,i,Sky);
+                Lear.skysync = [Lear.skysync;Skyframe;Skyframe];
+            end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Left Ear Track
         LearTrack.vid = dir('Lear_mouse*labeled.mp4');
             if length(LearTrack.vid) > 1
@@ -279,18 +337,19 @@ function ProcessCams(varargin)
             LearTrack.raw = textscan(fopen(LearTrack.csv.name),'%q');
             LearTrack.raw = LearTrack.raw{1};
             [LearTrack] = readDLCOutput(LearTrack);
-            
     end
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Save
     clear temp;
     clear i;
     clear datadir;
-    clear Find;
     clear varargin;
     clear testlength;
     clear stopframe;
     clear choice;
     clear proceed;
+    clear no_trigs;
+    clear mo;
+    clear Skyframe;
     Behavior = strcat('Behavior', Sky.vid.name(4:34));
     save (Behavior)
 end
@@ -328,3 +387,28 @@ end
 %             Spy.TTtimes = Spy.times(Spy.TTs);
 %             Spy.Tdur = time(between(Spy.times(1),Spy.TTtimes,'time'));
 %             Spy.dur = time(between(Spy.times(1),Spy.times,'time'));
+
+
+
+%%%%%%%%%%%% Functions %%%%%%%%%%%%
+function [Skyframe] = DI2Sky(varargin) %varargin = InputVid,DIframe
+    %Returns Skyframe# closest in time to InputVidFrame#
+    InputVid = varargin{1};
+    DIframe = varargin{2};
+    Sky = varargin{3};
+    
+    test = milliseconds(InputVid.times(DIframe) - Sky.times);
+    frame = find(test<0,1);
+    if isempty(frame)
+        frame = length(test);
+    end
+    timeaftertime = milliseconds(Sky.times(frame)-InputVid.times(DIframe));
+    timebefortime = milliseconds(Sky.times(frame-1)-InputVid.times(DIframe));
+    
+    if abs(timeaftertime)<abs(timebefortime)
+        Skyframe = frame;
+    elseif abs(timebefortime)<abs(timeaftertime)
+        Skyframe = frame-1;
+    end
+
+end

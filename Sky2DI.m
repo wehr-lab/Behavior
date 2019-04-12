@@ -4,7 +4,7 @@ function [DIframe,relation] = Sky2DI(varargin) %varargin = Skyframe,InputVid,opt
     InputVid = varargin{2};
     
     temp = dir('Behavior_mouse*.mat');
-    load(temp.name); %load camsDIframe = 1;
+    load(temp.name);
     
     if isequal(InputVid,'Leye')
         test = milliseconds(Leye.times - Sky.times(Skyframe));
@@ -22,6 +22,22 @@ function [DIframe,relation] = Sky2DI(varargin) %varargin = Skyframe,InputVid,opt
         end
         timeaftertime = milliseconds(Reye.times(frame)-Sky.times(Skyframe));
         timebefortime = milliseconds(Reye.times(frame-1)-Sky.times(Skyframe));
+    elseif isequal(InputVid,'Lear')
+        test = milliseconds(Lear.times - Sky.times(Skyframe));
+        frame = find(test>0,1);
+        if isempty(frame)
+            frame = length(test);
+        end
+        timeaftertime = milliseconds(Lear.times(frame)-Sky.times(Skyframe));
+        timebefortime = milliseconds(Lear.times(frame-1)-Sky.times(Skyframe));
+    elseif isequal(InputVid,'Rear')
+        test = milliseconds(Rear.times - Sky.times(Skyframe));
+        frame = find(test>0,1);
+        if isempty(frame)
+            frame = length(test);
+        end
+        timeaftertime = milliseconds(Rear.times(frame)-Sky.times(Skyframe));
+        timebefortime = milliseconds(Rear.times(frame-1)-Sky.times(Skyframe));
     end
     
     if nargin == 2
