@@ -14,7 +14,7 @@ function [outputstructure] = readDLCOutput(inputstructure)
     inputstructure.length = length(inputstructure.raw)-3;
     for i = 1:numberofpoints
         name = string(columns{1,i});
-        inputstructure.(name) = dlmread(inputstructure.csv.name,',',[3,columns{2,i}(1),inputstructure.length+2,columns{2,i}(end)]);
+        inputstructure.(char(name)) = dlmread(inputstructure.csv.name,',',[3,columns{2,i}(1),inputstructure.length+2,columns{2,i}(end)]);
     end
     inputstructure.numberofpoints = numberofpoints;
     outputstructure = inputstructure;
