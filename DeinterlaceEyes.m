@@ -4,13 +4,13 @@ SelectedFolders = uigetfile_n_dir(pwd);
 SelectedFolders = SelectedFolders';
 
 for i = 1:length(SelectedFolders)
-    LeyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Leye_m*.mp4'));
+    LeyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Leye_m*.avi'));
     for ii = 1:length(LeyeFiles{i,1})
         if length(LeyeFiles{i,1}(ii).name) == 39
             v_filesL{i,1} = strcat(LeyeFiles{i,1}(ii).folder,'\',LeyeFiles{i,1}(ii).name);
         end
     end
-    ReyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Reye_m*.mp4'));
+    ReyeFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Reye_m*.avi'));
     for ii = 1:length(ReyeFiles{i,1})
         if length(ReyeFiles{i,1}(ii).name) == 39
             v_filesR{i,1} = strcat(ReyeFiles{i,1}(ii).folder,'\',ReyeFiles{i,1}(ii).name);
@@ -18,7 +18,15 @@ for i = 1:length(SelectedFolders)
     end
 end
 
-v_files = [v_filesL;v_filesR];
+v_files = [];
+for i = 1:length(SelectedFolders)
+    if ~isempty(v_filesL{i})
+        v_files{end+1,1} = v_filesL{i};
+    end
+    if ~isempty(v_filesR{i})
+        v_files{end+1,1} = v_filesR{i};
+    end
+end
 
 for i = 1:length(v_files)                       %for all videos found,
     
@@ -30,6 +38,7 @@ for i = 1:length(v_files)                       %for all videos found,
     [ImagesFolder] = DeinterlaceFrames(vid);    %Deinterlace each frame
 
     [NewName] = MakeDeinterlacedVideo(vid,ImagesFolder);%Make a video with those frames
+    rmdir(char(ImagesFolder),'s')                %Delete DI folder
     NewNames{i} = NewName;
 end
 

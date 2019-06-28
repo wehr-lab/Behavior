@@ -17,7 +17,7 @@ LeyeDuctions = []; ReyeDuctions = []; %[theta,centralangle,cyclotorsion]
     
 %%%%%%     Reye     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     load('ReyeCyclotorsion.mat');
-        Cyc = LeyeCyclotorsion.Cyc;
+        Cyc = ReyeCyclotorsion.Cyc;
     load('ReyeGeodesics.mat');
         pup = ReyeGeodesics.pup;
         

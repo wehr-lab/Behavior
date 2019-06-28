@@ -1,4 +1,4 @@
-function [Degenerates,Compressed,Untouched,Unknown] = v_files2check(varargin) %(v_string,'deletefiles')
+function [Degenerates,Compressed,Untouched,Unknown,framenumbers] = v_files2check(varargin) %(v_string,'deletefiles')
 %Check if compression was successful. 
 
 if strlength(varargin{1}(2))<5                          %check if input is v_string or v_files
@@ -17,7 +17,11 @@ Degenerates = [];
 Compressed = [];
 Untouched = [];
 Unknown = [];
+framenumbers = [];
 for i = 1:length(v_files)
+    showthis = strcat('file',num2str(i),'of',num2str(length(v_files)));
+    disp(showthis)
+    
     rawfile = char(v_files(i));
     cmpfile = strrep(rawfile,'.avi','.mp4');
     
@@ -30,10 +34,20 @@ for i = 1:length(v_files)
             if exist('deletefiles')
                 clear rawvid
                 delete(rawfile)
+                
+%                 TF = contains(cmpfile,'Deinterlaced');
+%                 if TF == 1                                  %and delete DI folder too
+%                     test = strsplit(cmpfile,'\\');
+%                     test = strsplit(test{end},'Deinterlaced');
+%                     ImageFolderName = strcat('Deinterlace_',test{1});
+%                     ImageFolder = strcat(cmpvid.path,'\',ImageFolderName);
+%                     rmdir(char(ImageFolder),'s')
+%                 end
             end
             
         elseif rawvid.NumberofFrames ~= cmpvid.NumberofFrames %if different, add its name to Degenerates, optionally delete cmpfiles
             Degenerates = [Degenerates; {rawfile}];
+            framenumbers = [framenumbers; rawvid.NumberofFrames, cmpvid.NumberofFrames];
             if exist('deletefiles')
                 clear cmpvid
                 delete(cmpfile)

@@ -32,14 +32,14 @@ if exist('dirs.mat','file')
         %function instead, and instead of using any .t files, it requires the
         %'cellnum' which it uses to iterate through the non-noise clusters in 'cluster_groups.csv'
         %So for now at least, I have fn = [clust, channel, cellnum]
-        fn= [sp.cids(i),chan, i];
+        fn= [chan,sp.cids(i),i];
         
-        channel=fn(1,2);
-        clust=fn(1,1);
+        channel=fn(1,1);
+        clust=fn(1,2);
         cellnum=fn(1,3); %This number is necessary for 
         fprintf('\nchannel %d, cluster %d', channel, clust)
         fprintf('\nreading KiloSort output cell %d', clust)
-        spiketimes=readKiloSortOutput(cellnum, sampleRate);
+        spiketimes=readKiloSortOutput(clust, sampleRate);
         st{i} = spiketimes;
     end
 end
