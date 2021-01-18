@@ -66,10 +66,10 @@ Sky.csv = dir('Sky_m*.csv');
     Sky.TTs = Sky.TTs(temp(1,:),1); clear temp;
     %%%% End of that snippet
     
-    Sky.TTtimes = Sky.times(Sky.TTs,1); %timestamps for each trigger
-    Sky.NumberOfTrigs = length(Sky.TTs); %number of triggers detected
-    Sky.TTdur = time(between(Sky.TTtimes(1),Sky.TTtimes(end),'time')); %duration of video between first and last trigger
-    Sky.dur = time(between(Sky.times(1),Sky.times(end),'time')); %duration of video
+    Sky.TTtimes = Sky.times(Sky.TTs,1);                                     %timestamps for each trigger
+    Sky.NumberOfTrigs = length(Sky.TTs);                                    %number of triggers detected
+    Sky.TTdur = time(between(Sky.TTtimes(1),Sky.TTtimes(end),'time'));      %duration of video between first and last trigger
+    Sky.dur = time(between(Sky.times(1),Sky.times(end),'time'));            %duration of video
     %We should incorporate a comparison with the number of SCTs for a
     %sanity check here in the future
 end
@@ -117,9 +117,9 @@ video.csv = dir(csvsearch); %timestamps from bonsai
     for i=1:length(TrueTrigTimes)
         video.TTs(i) = find(TrueTrigTimes(i)<video.times, 1); %framenumber of trigger
     end
-    video.TTtimes = video.times(video.TTs); %timestamps for each trigger
+    video.TTtimes = video.times(video.TTs);                                 %timestamps for each trigger
     video.TTdur = time(between(video.TTtimes(1),video.TTtimes(end),'time')); %duration of video between first and last trigger
-    video.dur = time(between(video.times(1),video.times(end),'time')); %duration of video
+    video.dur = time(between(video.times(1),video.times(end),'time'));      %duration of video
 end
 function [Skyframe] = DI2Sky(varargin) %varargin = InputVid,DIframe
     %Returns Skyframe# closest in time to InputVidFrame#
