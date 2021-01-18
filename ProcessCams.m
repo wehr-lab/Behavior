@@ -2,21 +2,23 @@ function ProcessCams(varargin)
 
 %% Sky Cam:
 [Sky] = GetSkyVideo();
+
 %% Analog Cams:
 if nargin>=1
     [Head] = GetAnalogVideo('Head',Sky.TTtimes);
     [Lear] = GetAnalogVideo('Lear',Sky.TTtimes);
     [Rear] = GetAnalogVideo('Rear',Sky.TTtimes);
 %     [Forw] = GetAnalogVideo('Forw',Sky.TTtimes);
-else
 end
-%%    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Save
+
+%% Save
 Behavior = strcat('Behavior', Sky.vid.name(4:34));
 if nargin>=1
     save(Behavior,'Sky','Head','Lear','Rear')
 else
     save(Behavior,'Sky')
 end
+
 end
 
 
