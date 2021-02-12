@@ -38,6 +38,8 @@ Sky.vid = dir('Sky_m*.mp4'); %raw video from bonsai
             end
         end
     end
+    obj = VideoReader(Sky.vid.name);
+    Sky.vid.framerate = obj.FrameRate;
 Sky.csv = dir('Sky_m*.csv');
     if length(Sky.csv) > 1
         for i = 1:length(Sky.csv)
@@ -66,12 +68,22 @@ Sky.csv = dir('Sky_m*.csv');
         temp(i)=Sky.TTs(i)-Sky.TTs(i-1); %subtract previous trigger framenumber.
     end
     temp = temp - ones(size(temp)); temp = find(temp);
-    Sky.TTs = Sky.TTs(temp(1,:),1); clear temp;
+    try
+        Sky.TTs = Sky.TTs(temp(1,:),1);
+    catch
+        Sky.TTs = [];
+        disp('No LED triggers found!')
+    end
+    clear temp;
     %%%% End of that snippet
     
     Sky.TTtimes = Sky.times(Sky.TTs,1);                                     %timestamps for each trigger
     Sky.NumberOfTrigs = length(Sky.TTs);                                    %number of triggers detected
-    Sky.TTdur = time(between(Sky.TTtimes(1),Sky.TTtimes(end),'time'));      %duration of video between first and last trigger
+    try
+        Sky.TTdur = time(between(Sky.TTtimes(1),Sky.TTtimes(end),'time'));      %duration of video between first and last trigger
+    catch
+        Sky.TTdur = [];
+    end
     Sky.dur = time(between(Sky.times(1),Sky.times(end),'time'));            %duration of video
     %%%% We should incorporate a comparison with the number of SCTs for a sanity check here in the future
     
@@ -84,6 +96,20 @@ Sky.csv = dir('Sky_m*.csv');
         [Sky] = readDLCOutput(Sky);
     end
         
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add in path to ephys folder
+    test = dir(); narrowdown = find([test.isdir]); %identifies folders present in our main experiment folder
+    for k = 1:length(narrowdown)
+        testing = strsplit(test(k).name,'_mouse-');
+        if length(testing) > 1 %then it is a folder with '_mouse-' in its name, so it's almost certainly the OE folder...
+            ephysfolder = strcat(test(k).folder,'\',test(k).name);
+        end
+    end
+    try
+        Sky.ephysfolder = ephysfolder;
+    catch
+        Sky.ephysfolder = []; %no ephys folder found for this experiment
+    end
+    
 end
 function [video] = GetAnalogVideo(varargin) %Returns a structure with video information
 CamName = varargin{1}; TrueTrigTimes = varargin{2};
@@ -102,7 +128,8 @@ video.vid = dir(vidsearch);
             end
         end
     end
-    
+    obj = VideoReader(video.vid.name);
+    video.vid.framerate = obj.FrameRate;
 csvsearch = strcat(CamName,'_m*.csv');
 video.csv = dir(csvsearch); %timestamps from bonsai
     if length(video.csv) < 1
@@ -129,8 +156,13 @@ video.csv = dir(csvsearch); %timestamps from bonsai
     for i=1:length(TrueTrigTimes)
         video.TTs(i) = find(TrueTrigTimes(i)<video.times, 1); %framenumber of trigger
     end
-    video.TTtimes = video.times(video.TTs);                                 %timestamps for each trigger
-    video.TTdur = time(between(video.TTtimes(1),video.TTtimes(end),'time')); %duration of video between first and last trigger
+    try
+        video.TTtimes = video.times(video.TTs);                                     %timestamps for each trigger
+        video.TTdur = time(between(video.TTtimes(1),video.TTtimes(end),'time'));    %duration of video between first and last trigger
+    catch
+        video.TTtimes = [];                                                         %no triggers were found
+        video.TTdur = [];                                                           %no triggers were found
+    end
     video.dur = time(between(video.times(1),video.times(end),'time'));      %duration of video
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DLC tracks
