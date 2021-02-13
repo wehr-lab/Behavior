@@ -39,7 +39,7 @@ function [st,sp] = ProcessSpikes(sampleRate)
 
             channel=fn(1,1);
             clust=fn(1,2);
-            cellnum=fn(1,3); %This number is necessary for 
+            cellnum=fn(1,3);
             fprintf('\nchannel %d, cluster %d', channel, clust)
             fprintf('\nreading KiloSort output cell %d', clust)
             spiketimes=readKiloSortOutput(clust, sampleRate);
