@@ -9,10 +9,10 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
     if length(test) < 1 %that means we're in the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %so load the behavior file
         cd(Sky.ephysfolder); %then go to the ephys folder
-        [~,~,~,~,Events,~] = LoadExperiment(); close; %and get sampleRate/Events
+        [~,~,~,~,Events,~] = LoadExperiment(); close; %and get Events
         
     else %we're in the ephys folder
-        [~,~,~,~,Events,~] = LoadExperiment(); close; %so get sampleRate/Events
+        [~,~,~,~,Events,~] = LoadExperiment(); close; %so get Events
         cd .. %then back out to the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %and load the behavior file
     end
@@ -76,7 +76,7 @@ function [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out)
         end
 end
 function [SpecificStructure] = String2Struct(InputDataStream)
-%%%%%%%%%%%%%%% load Bonsai/OE info %%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%% load Bonsai info %%%%%%%%%%%%%%%
     currentdir = pwd; %remember where we started
     test = dir('*.continuous');
     if length(test) < 1 %that means we're in the bonsai folder

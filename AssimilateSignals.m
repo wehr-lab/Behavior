@@ -32,11 +32,11 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         vids{2,4} = ThisToThat('Sky',SkyStop,'Head');
     end
         
-    for i = 1:size(vids,1)
-        vids{i,5} = vids{i,4}-vids{i,3}; %number of frames in range
-    end
+%     for i = 1:size(vids,1)
+%         vids{i,5} = vids{i,4}-vids{i,3}; %number of frames in range
+%     end
     
-%% find units, calculate range, generate spike rasters
+%% get spiketimes of units, calculate range, write them as spike rasters
     cd(Sky.ephysfolder)
     Header = dir('*_CH1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1}; test = strcat(Header,'_CH1.continuous');
     [temp, ~, ~] = load_open_ephys_data(test);
@@ -50,36 +50,36 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         spikes = st{1,i}*sampleRate; %convert spiketimes to samples after start of acquisition
         trace = blank;
         for ii = 1:length(spikes)
-           trace(1,round(spikes(ii))) = 1; %
+           trace(1,round(spikes(ii))) = 1;
         end
         units{i,2} = trace;       %total recording samples for trial with spikes as ones    
         units{i,3} = ThisToThat('Sky',SkyStart,'OE');  %SkyStart samplenumber
         units{i,4} = ThisToThat('Sky',SkyStop,'OE');  %SkyStop samplenumber
     end
-    for i = 1:size(units,1)
-        units{i,5} = units{i,4}-units{i,3}; %total samples between SkyStart and SkyStop
-    end
+%     for i = 1:size(units,1)
+%         units{i,5} = units{i,4}-units{i,3}; %total samples between SkyStart and SkyStop
+%     end
     catch
     end
     
 %% declare Continuous traces & calculate ranges
 	%First 3 are always the accelerometer traces
     chans = []; Header = dir('*_AUX1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1};
-    chans{1,1} = 'ACCLRM.FB';
+    chans{1,1} = 'ACCLRM-FB';
     chans{1,2} = strcat(Sky.ephysfolder,'\',Header,'_AUX1.continuous');
     chans{1,3} = ThisToThat('Sky',SkyStart,'OE');
     chans{1,4} = ThisToThat('Sky',SkyStop,'OE');
-    chans{1,5} = chans{1,4} - chans{1,3};
-    chans{2,1} = 'ACCLRM.UD';
+%     chans{1,5} = chans{1,4} - chans{1,3};
+    chans{2,1} = 'ACCLRM-UD';
     chans{2,2} = strcat(Sky.ephysfolder,'\',Header,'_AUX2.continuous');
     chans{2,3} = chans{1,3};
     chans{2,4} = chans{1,4};
-    chans{2,5} = chans{1,5};
-    chans{3,1} = 'ACCLRM.LR';
+%     chans{2,5} = chans{1,5};
+    chans{3,1} = 'ACCLRM-LR';
     chans{3,2} = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
     chans{3,3} = chans{1,3};
     chans{3,4} = chans{1,4};
-    chans{3,5} = chans{1,5};
+%     chans{3,5} = chans{1,5};
     
     %Additional chans are single channels, if desired
     [phys] = GetPhysiology(Sky);
@@ -90,9 +90,9 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
             chans{i+3,3} = chans{1,3};
             chans{i+3,4} = chans{1,4};
         end
-        for i = 1:size(chans,1)
-            chans{i,5} = chans{i,4}-chans{i,3};
-        end
+%         for i = 1:size(chans,1)
+%             chans{i,5} = chans{i,4}-chans{i,3};
+%         end
     else
     end
     
