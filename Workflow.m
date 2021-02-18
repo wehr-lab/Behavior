@@ -28,9 +28,8 @@ for i = 1:length(Bdirs)
     cd(Bdirs{i})
     behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %load the behavior file
     cd(Sky.ephysfolder) %cd to the OE folder for this trial
-    [~,~,~,sampleRate,~,~] = LoadExperiment(); %loads the experiment info, in this case we just want the sampleRate
-    [st,~] = ProcessSpikes(sampleRate); %st = spiketimes for this trial, in seconds after the start of acquisition for this trial
-    save('st','st'); %saved as 'st.mat' in the OE folder
+    [SortedUnits,sampleRate] = ProcessSpikes(); %SortedUnits.spiketimes = spiketimes for this trial, in seconds after the start of acquisition for this trial
+    save('SortedUnits','SortedUnits','sampleRate'); %saved as 'SortedUnits.mat' in the OE folder
 end
 
 %% Assimilate Signals: Makes a file with alignment information for all your data-streams

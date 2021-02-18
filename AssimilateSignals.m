@@ -12,87 +12,77 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     
 %% declare videos & calculate ranges
     vids = [];
-    vids{1,1} = 'Sky';
-    vids{1,2} = strcat(Sky.vid.folder,'\',Sky.vid.name);
-    vids{1,3} = SkyStart;
-    vids{1,4} = SkyStop;
+    vids(1).name = 'Sky';
+    vids(1).file = strcat(Sky.vid.folder,'\',Sky.vid.name);
+    vids(1).start = SkyStart;
+    vids(1).stop = SkyStop;
     
     if exist('Lear','var')
-        vids{3,1} = 'Lear';
-        vids{3,2} = strcat(Lear.vid.folder,'\',Lear.vid.name);
-        vids{3,3} = ThisToThat('Sky',SkyStart,'Lear');
-        vids{3,4} = ThisToThat('Sky',SkyStop,'Lear');
-        vids{4,1} = 'Rear';
-        vids{4,2} = strcat(Rear.vid.folder,'\',Rear.vid.name);
-        vids{4,3} = ThisToThat('Sky',SkyStart,'Rear');
-        vids{4,4} = ThisToThat('Sky',SkyStop,'Rear');
-        vids{2,1} = 'Head';
-        vids{2,2} = strcat(Head.vid.folder,'\',Head.vid.name);
-        vids{2,3} = ThisToThat('Sky',SkyStart,'Head');
-        vids{2,4} = ThisToThat('Sky',SkyStop,'Head');
+        vids(3).name = 'Lear';
+        vids(3).file = strcat(Lear.vid.folder,'\',Lear.vid.name);
+        vids(3).start = ThisToThat('Sky',SkyStart,'Lear');
+        vids(3).stop = ThisToThat('Sky',SkyStop,'Lear');
+        vids(4).name = 'Rear';
+        vids(4).file = strcat(Rear.vid.folder,'\',Rear.vid.name);
+        vids(4).start = ThisToThat('Sky',SkyStart,'Rear');
+        vids(4).stop = ThisToThat('Sky',SkyStop,'Rear');
+        vids(2).name = 'Head';
+        vids(2).file = strcat(Head.vid.folder,'\',Head.vid.name);
+        vids(2).start = ThisToThat('Sky',SkyStart,'Head');
+        vids(2).stop = ThisToThat('Sky',SkyStop,'Head');
     end
-        
-%     for i = 1:size(vids,1)
-%         vids{i,5} = vids{i,4}-vids{i,3}; %number of frames in range
-%     end
     
-%% get spiketimes of units, calculate range, write them as spike rasters
+%% calculate OpenEphys range & get spiketimes of sorted units
+    OEstart = ThisToThat('Sky',SkyStart,'OE');  %OpenEphys start samplenumber
+    OEstop = ThisToThat('Sky',SkyStop,'OE');  %OpenEphys stop samplenumber
+
     cd(Sky.ephysfolder)
-    Header = dir('*_CH1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1}; test = strcat(Header,'_CH1.continuous');
-    [temp, ~, ~] = load_open_ephys_data(test);
-    TotalSamples = length(temp); %total recording samples for this trial
-    [~,~,~,sampleRate,~,~] = LoadExperiment();  close; %load the sampleRate
-    units = []; blank = zeros(1,TotalSamples);
     try
-        load('st.mat'); %spiketimes, in seconds after start of acquisition of this trial
-    for i = 1:length(st) %for each unit
-        units{i,1} = st{2,i}; %note its chan, clust, and cellID
-        spikes = st{1,i}*sampleRate; %convert spiketimes to samples after start of acquisition
-        trace = blank;
-        for ii = 1:length(spikes)
-           trace(1,round(spikes(ii))) = 1;
+        load('SortedUnits.mat'); %spiketimes, in seconds after start of acquisition of this trial
+        for i = 1:length(SortedUnits) %for each unit
+            units(i).name = SortedUnits(i).cellnum; %CellID for each sorted unit
+            units(i).spiketimes = SortedUnits(i).spiketimes; %spiketimes for this trial, in seconds after the start of acquisition for this trial
+            units(i).start = OEstart/sampleRate;  %OpenEphys start converted to seconds
+            units(i).stop = OEstop/sampleRate;  %OpenEphys stop converted to seconds
+            units(i).channel = SortedUnits(i).channel;
+            units(i).cluster = SortedUnits(i).cluster;
+            units(i).rating = SortedUnits(i).rating;
+            units(i).sampleRate = sampleRate;
         end
-        units{i,2} = trace;       %total recording samples for trial with spikes as ones    
-        units{i,3} = ThisToThat('Sky',SkyStart,'OE');  %SkyStart samplenumber
-        units{i,4} = ThisToThat('Sky',SkyStop,'OE');  %SkyStop samplenumber
-    end
-%     for i = 1:size(units,1)
-%         units{i,5} = units{i,4}-units{i,3}; %total samples between SkyStart and SkyStop
-%     end
     catch
+        disp('no SortedUnits.mat file found')
+        units = {};
     end
     
 %% declare Continuous traces & calculate ranges
 	%First 3 are always the accelerometer traces
-    chans = []; Header = dir('*_AUX1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1};
-    chans{1,1} = 'ACCLRM-FB';
-    chans{1,2} = strcat(Sky.ephysfolder,'\',Header,'_AUX1.continuous');
-    chans{1,3} = ThisToThat('Sky',SkyStart,'OE');
-    chans{1,4} = ThisToThat('Sky',SkyStop,'OE');
-%     chans{1,5} = chans{1,4} - chans{1,3};
-    chans{2,1} = 'ACCLRM-UD';
-    chans{2,2} = strcat(Sky.ephysfolder,'\',Header,'_AUX2.continuous');
-    chans{2,3} = chans{1,3};
-    chans{2,4} = chans{1,4};
-%     chans{2,5} = chans{1,5};
-    chans{3,1} = 'ACCLRM-LR';
-    chans{3,2} = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
-    chans{3,3} = chans{1,3};
-    chans{3,4} = chans{1,4};
-%     chans{3,5} = chans{1,5};
+    Header = dir('*_AUX1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1};
+    chans(1).name = 'ACCLRM-FB';
+    chans(1).file = strcat(Sky.ephysfolder,'\',Header,'_AUX1.continuous');
+    chans(1).start = OEstart;
+    chans(1).stop  = OEstop;
+    chans(1).sampleRate = sampleRate;
+    chans(2).name = 'ACCLRM-UD';
+    chans(2).file = strcat(Sky.ephysfolder,'\',Header,'_AUX2.continuous');
+    chans(2).start = OEstart;
+    chans(2).stop = OEstop;
+    chans(2).sampleRate = sampleRate;
+    chans(3).name = 'ACCLRM-LR';
+    chans(3).file = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
+    chans(3).start = OEstart;
+    chans(3).stop = OEstop;
+    chans(3).sampleRate = sampleRate;
     
     %Additional chans are single channels, if desired
     [phys] = GetPhysiology(Sky);
     if length(phys)>1
         for i = 1:length(phys)
-            chans{i+3,1} = phys(i).Area;
-            chans{i+3,2} = strcat(Sky.ephysfolder,'\',phys(i).filename);
-            chans{i+3,3} = chans{1,3};
-            chans{i+3,4} = chans{1,4};
+            chans(i+3).name = phys(i).Area;
+            chans(i+3).file = strcat(Sky.ephysfolder,'\',phys(i).filename);
+            chans(i+3).start = OEstart;
+            chans(i+3).stop = OEstop;
+            chans(i+3).sampleRate = sampleRate;
         end
-%         for i = 1:size(chans,1)
-%             chans{i,5} = chans{i,4}-chans{i,3};
-%         end
     else
     end
     
