@@ -59,19 +59,10 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     Header = dir('*_AUX1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1};
     chans(1).name = 'ACCLRM-FB';
     chans(1).file = strcat(Sky.ephysfolder,'\',Header,'_AUX1.continuous');
-    chans(1).start = OEstart;
-    chans(1).stop  = OEstop;
-    chans(1).sampleRate = sampleRate;
     chans(2).name = 'ACCLRM-UD';
     chans(2).file = strcat(Sky.ephysfolder,'\',Header,'_AUX2.continuous');
-    chans(2).start = OEstart;
-    chans(2).stop = OEstop;
-    chans(2).sampleRate = sampleRate;
     chans(3).name = 'ACCLRM-LR';
     chans(3).file = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
-    chans(3).start = OEstart;
-    chans(3).stop = OEstop;
-    chans(3).sampleRate = sampleRate;
     
     %Additional chans are single channels, if desired
     [phys] = GetPhysiology(Sky);
@@ -79,13 +70,15 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         for i = 1:length(phys)
             chans(i+3).name = phys(i).Area;
             chans(i+3).file = strcat(Sky.ephysfolder,'\',phys(i).filename);
-            chans(i+3).start = OEstart;
-            chans(i+3).stop = OEstop;
-            chans(i+3).sampleRate = sampleRate;
         end
     else
     end
     
+    for i = 1:length(chans)
+        chans(i).start = OEstart;
+        chans(i).stop  = OEstop;
+        chans(i).sampleRate = sampleRate;
+    end
 %% return to bonsai folder
 cd(Sky.vid.folder)
 
