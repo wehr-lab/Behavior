@@ -9,10 +9,10 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
     if length(test) < 1 %that means we're in the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %so load the behavior file
         cd(Sky.ephysfolder); %then go to the ephys folder
-        [~,~,~,~,Events,~] = LoadExperiment(); close; %and get Events
+        [~,~,~,sampleRate,Events,~] = LoadExperiment(); close; %and get Events
         
     else %we're in the ephys folder
-        [~,~,~,~,Events,~] = LoadExperiment(); close; %so get Events
+        [~,~,~,sampleRate,Events,~] = LoadExperiment(); close; %so get Events
         cd .. %then back out to the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %and load the behavior file
     end
@@ -20,6 +20,8 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
     
 %% %%%%%%%%%%%%% get position(s) between trigs %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isequal(InputDataStream,'OE')
+%         Trig1_in = (Events(1).soundcard_trigger_timestamp_sec*sampleRate);
+%         Trig2_in = (Events(end).soundcard_trigger_timestamp_sec*sampleRate);
         Trig1_in = (Events(1).message_timestamp_samples);
         Trig2_in = (Events(end).message_timestamp_samples);
         [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
@@ -41,6 +43,8 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
 
 %% %%%%%% find equivalent sample between trigs, add offset by trig1 %%%%%%%
     if isequal(OutputDataStream,'OE')
+%         Trig1_out = (Events(1).soundcard_trigger_timestamp_sec*sampleRate);
+%         Trig2_out = (Events(end).soundcard_trigger_timestamp_sec*sampleRate);
         Trig1_out = (Events(1).message_timestamp_samples);
         Trig2_out = (Events(end).message_timestamp_samples);
         [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);

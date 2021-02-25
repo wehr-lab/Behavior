@@ -53,6 +53,7 @@ function [SortedUnits,sampleRate] = ProcessSpikes()
             end
         end
         sampleRate = sp.sample_rate;
+        save('SortedUnits','SortedUnits','sampleRate'); %saved as 'SortedUnits.mat' in the OE folder
     end
 end
 

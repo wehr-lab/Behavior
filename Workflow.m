@@ -22,14 +22,13 @@ for i = 1:length(Bdirs)
 end
 
 %% ProcessSpikes: saves spiketimes for all kilosorted cells labeled 'good' 
-% in a cell array: 'st.mat'.
+% in a structure called 'SortedUnits'
 
 for i = 1:length(Bdirs)
     cd(Bdirs{i})
     behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %load the behavior file
     cd(Sky.ephysfolder) %cd to the OE folder for this trial
     [SortedUnits,sampleRate] = ProcessSpikes(); %SortedUnits.spiketimes = spiketimes for this trial, in seconds after the start of acquisition for this trial
-    save('SortedUnits','SortedUnits','sampleRate'); %saved as 'SortedUnits.mat' in the OE folder
 end
 
 %% Assimilate Signals: Makes a file with alignment information for all your data-streams
