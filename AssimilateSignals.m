@@ -32,11 +32,13 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         vids(2).stop = ThisToThat('Sky',SkyStop,'Head');
     end
     
-%% calculate OpenEphys range & get spiketimes of sorted units
+    %% calculate OpenEphys range & get spiketimes of sorted units
     OEstart = ThisToThat('Sky',SkyStart,'OE');  %OpenEphys start samplenumber
     OEstop = ThisToThat('Sky',SkyStop,'OE');  %OpenEphys stop samplenumber
-
-    cd(Sky.ephysfolder)
+    
+    ephysfolder=Sky.ephysfolder;
+    if ismac ephysfolder=macifypath(ephysfolder);end
+    cd(ephysfolder); %then go to the ephys folder
     try
         load('SortedUnits.mat'); %spiketimes, in seconds after start of acquisition of this trial
         for i = 1:length(SortedUnits) %for each unit
@@ -79,13 +81,15 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         chans(i).stop  = OEstop;
         chans(i).sampleRate = sampleRate;
     end
-%% return to bonsai folder
-cd(Sky.vid.folder)
-
+    %% return to bonsai folder
+    skyvidfolder=Sky.vid.folder;
+    if ismac skyvidfolder=macifypath(skyvidfolder);end
+    cd(skyvidfolder)
+    
 end
 
 function [phys] = GetPhysiology(Sky)
-    if exist('E:\Nick\MouseConfigurations', 'dir')
+if exist('E:\Nick\MouseConfigurations', 'dir')
         currentdir = pwd; %remember where we started
         mouseID = strsplit(Sky.ephysfolder,'mouse-'); mouseID = mouseID{end};
         cd('E:\Nick\MouseConfigurations')

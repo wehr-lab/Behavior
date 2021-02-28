@@ -3,6 +3,7 @@ function [SortedUnits,sampleRate] = ProcessSpikes()
         datadir = pwd;
         load('dirs.mat')
         masterdir=dirs{1};
+        if ismac masterdir=macifypath(masterdir);end
         sp = loadKSdir(masterdir);
         
         %These two lines adapted from: https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/phy-users/Ydu1etOXwF0/-vEM9Rx_BgAJ

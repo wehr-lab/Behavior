@@ -8,7 +8,9 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
     test = dir('*.continuous');
     if length(test) < 1 %that means we're in the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %so load the behavior file
-        cd(Sky.ephysfolder); %then go to the ephys folder
+        ephysfolder=Sky.ephysfolder;
+        if ismac ephysfolder=macifypath(ephysfolder);end
+        cd(ephysfolder); %then go to the ephys folder
         [~,~,~,~,Events,~] = LoadExperiment(); close; %and get Events
         
     else %we're in the ephys folder
