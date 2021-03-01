@@ -11,10 +11,10 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         ephysfolder=Sky.ephysfolder;
         if ismac ephysfolder=macifypath(ephysfolder);end
         cd(ephysfolder); %then go to the ephys folder
-        [~,~,~,~,Events,~] = LoadExperiment(); close; %and get Events
+        [~,~,~,~,Events,~] = LoadExperiment(); %and get Events
         
     else %we're in the ephys folder
-        [~,~,~,~,Events,~] = LoadExperiment(); close; %so get Events
+        [~,~,~,~,Events,~] = LoadExperiment(); %so get Events
         cd .. %then back out to the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %and load the behavior file
     end
