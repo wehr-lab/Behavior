@@ -54,6 +54,7 @@ function [SortedUnits,sampleRate] = ProcessSpikes()
             end
         end
         sampleRate = sp.sample_rate;
+        save SortedUnits SortedUnits sampleRate
     end
 end
 
