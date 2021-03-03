@@ -18,7 +18,9 @@ function [SortedUnits,sampleRate] = ProcessSpikes()
                 template = []; Utemplate = []; numUtemplate = [];
                 template = sp.spikeTemplates(sp.clu==sp.cids(i)); %identifies the template for every spike in this cluster/cell_ID
                 Utemplate = unique(template); %identify all the unique templates contained in this cluster/cell_ID
-
+                if isempty(Utemplate)
+                    error('no spikes match the cluster ids, this should not happen and could indicate an faulty kilosort run');
+                end
                 if length(Utemplate) == 1 %If the cluster contains spikes from only one template
                     template = ((template(1,1))+1); %then use this template (+1 because they are indexed from 0:nTemplates-1 and maxChannel is 1:nTemplates)
                     chan = maxChannel(template,1); %retun the channel that was identified to have the highest amplitude for this template
