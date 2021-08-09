@@ -26,7 +26,7 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
             Trig1_in = (Events(1).soundcard_trigger_timestamp_sec)*30000;
             Trig2_in = (Events(end).soundcard_trigger_timestamp_sec)*30000;
             [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
-        else %but use the events if SCTs not recorded (To do: add warning flag in this case)
+        else %but use the events if SCTs not recorded (GetEventsAndSCT_Timestamps will warn you in this case)
             Trig1_in = (Events(1).message_timestamp_samples);
             Trig2_in = (Events(end).message_timestamp_samples);
             [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
@@ -52,7 +52,7 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
             Trig1_out = (Events(1).soundcard_trigger_timestamp_sec)*30000;
             Trig2_out = (Events(end).soundcard_trigger_timestamp_sec)*30000;
             [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
-        else %but use the events if SCTs not recorded (To do: add warning flag in this case)
+        else %but use the events if SCTs not recorded (GetEventsAndSCT_Timestamps will warn you in this case)
             Trig1_out = (Events(1).message_timestamp_samples);
             Trig2_out = (Events(end).message_timestamp_samples);
             [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
