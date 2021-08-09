@@ -79,7 +79,11 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     for i = 1:length(chans)
         chans(i).start = OEstart;
         chans(i).stop  = OEstop;
-        chans(i).sampleRate = sampleRate;
+        try
+            chans(i).sampleRate = sampleRate;
+        catch
+            chans(i).sampleRate = 30000;
+        end
     end
     %% return to bonsai folder
     skyvidfolder=Sky.vid.folder;

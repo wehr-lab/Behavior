@@ -15,7 +15,7 @@ channel = SortedUnits(1).channel;
 
 %% Load channel map and find the other 3 channels for this tetrode
 load chanMap.mat;
-TTchannels = find(kcoords==kcoords(channel));
+TTchannels = find(kcoords==kcoords(channel+1));
 theseST = st(clu==ChosenCluster); % spike times for ChosenCluster
 nWFsToLoad = length(theseST); 
 
@@ -46,11 +46,12 @@ for i=1:nSpikesToPlot %for each spike
 end
 
 %% plot the spikes
+figure;
 for i=1:nSpikesToPlot %plot the spikes
     subplot(1,4,1); plot(TetrodeWaveforms{i}(1,:),'Color','b','LineWidth',0.5); hold on; title(strcat('Channel',string(TTchannels(1))));
     subplot(1,4,2); plot(TetrodeWaveforms{i}(2,:),'Color','b','LineWidth',0.5); hold on; title(strcat('Channel',string(TTchannels(2))));
     subplot(1,4,3); plot(TetrodeWaveforms{i}(3,:),'Color','b','LineWidth',0.5); hold on; title(strcat('Channel',string(TTchannels(3))));
     subplot(1,4,4); plot(TetrodeWaveforms{i}(4,:),'Color','b','LineWidth',0.5); hold on; title(strcat('Channel',string(TTchannels(4))));
 end
-titlestring = strcat('Tetrode:',string(kcoords(channel)),'CellNum:',string(SortedUnits(1).cellnum),' ',string(pwd));
+titlestring = strcat('Tetrode:',string(kcoords(channel+1)),'CellNum:',string(SortedUnits(1).cellnum),' ',string(pwd));
 annotation('textbox', [0 0.9 1 0.1], 'String', titlestring, 'EdgeColor', 'none', 'HorizontalAlignment', 'center');

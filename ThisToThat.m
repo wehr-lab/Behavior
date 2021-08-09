@@ -22,9 +22,15 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
     
 %% %%%%%%%%%%%%% get position(s) between trigs %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isequal(InputDataStream,'OE')
-        Trig1_in = (Events(1).message_timestamp_samples);
-        Trig2_in = (Events(end).message_timestamp_samples);
-        [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+        if ~isnan(Events(1).soundcard_trigger_timestamp_sec) %default to using the SCTs
+            Trig1_in = (Events(1).soundcard_trigger_timestamp_sec)*30000;
+            Trig2_in = (Events(end).soundcard_trigger_timestamp_sec)*30000;
+            [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+        else %but use the events if SCTs not recorded (To do: add warning flag in this case)
+            Trig1_in = (Events(1).message_timestamp_samples);
+            Trig2_in = (Events(end).message_timestamp_samples);
+            [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+        end
         
     elseif isequal(InputDataStream,'Sky')
         InputEventTime = Sky.times(InputEventIndex);
@@ -38,20 +44,26 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         Trig1_inTime = Sky.TTtimes(1);
         Trig2_inTime = Sky.TTtimes(end);
         [TrigRatio] = GetTrigRatio(InputEventTime,Trig1_inTime,Trig2_inTime);
-        
     end
 
 %% %%%%%% find equivalent sample between trigs, add offset by trig1 %%%%%%%
     if isequal(OutputDataStream,'OE')
-        Trig1_out = (Events(1).message_timestamp_samples);
-        Trig2_out = (Events(end).message_timestamp_samples);
-        [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+        if ~isnan(Events(1).soundcard_trigger_timestamp_sec) %default to using the SCTs
+            Trig1_out = (Events(1).soundcard_trigger_timestamp_sec)*30000;
+            Trig2_out = (Events(end).soundcard_trigger_timestamp_sec)*30000;
+            [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+        else %but use the events if SCTs not recorded (To do: add warning flag in this case)
+            Trig1_out = (Events(1).message_timestamp_samples);
+            Trig2_out = (Events(end).message_timestamp_samples);
+            [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+        end
         
     elseif isequal(OutputDataStream,'Sky')
         Trig1_out = Sky.TTtimes(1);
         Trig2_out = Sky.TTtimes(end);
         [IdealTime] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
-        [c, OutputIndex] = min(abs(Sky.times-IdealTime));
+%         [c, OutputIndex] = min(abs(Sky.times-IdealTime));
+        [OutputIndex] = Time2Index(IdealTime, Sky);
         
     else %Headcam data
         [SpecificStructure] = String2Struct(OutputDataStream);
@@ -101,5 +113,10 @@ function [SpecificStructure] = String2Struct(InputDataStream)
         SpecificStructure = Head;
     elseif isequal(InputDataStream,'Forw')
         SpecificStructure = Forw;
+    end
+end
+function [OutputIndex] = Time2Index(IdealTime, Sky)
+    for i = 1:length(IdealTime)
+        [c, OutputIndex(i)] = min(abs(Sky.times-IdealTime(i)));
     end
 end
