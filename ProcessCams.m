@@ -122,7 +122,7 @@ video.vid = dir(vidsearch);
     end
     if length(video.vid) > 1
         for i = 1:length(video.vid)
-            if length(video.csv(i).name) == 39
+            if length(video.vid(i).name) == 39
                 video.vid = video.vid(i); %choose raw video instead of DLC-labeled video if present in the folder
                 break
             end

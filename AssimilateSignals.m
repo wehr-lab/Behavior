@@ -20,21 +20,21 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     if exist('Lear','var')
         vids(3).name = 'Lear';
         vids(3).file = strcat(Lear.vid.folder,'\',Lear.vid.name);
-        vids(3).start = ThisToThat('Sky',SkyStart,'Lear');
-        vids(3).stop = ThisToThat('Sky',SkyStop,'Lear');
+        vids(3).start = ThisToThat('Sky',SkyStart,'Lear'); close;
+        vids(3).stop = ThisToThat('Sky',SkyStop,'Lear'); close;
         vids(4).name = 'Rear';
         vids(4).file = strcat(Rear.vid.folder,'\',Rear.vid.name);
-        vids(4).start = ThisToThat('Sky',SkyStart,'Rear');
-        vids(4).stop = ThisToThat('Sky',SkyStop,'Rear');
+        vids(4).start = ThisToThat('Sky',SkyStart,'Rear'); close;
+        vids(4).stop = ThisToThat('Sky',SkyStop,'Rear'); close;
         vids(2).name = 'Head';
         vids(2).file = strcat(Head.vid.folder,'\',Head.vid.name);
-        vids(2).start = ThisToThat('Sky',SkyStart,'Head');
-        vids(2).stop = ThisToThat('Sky',SkyStop,'Head');
+        vids(2).start = ThisToThat('Sky',SkyStart,'Head'); close;
+        vids(2).stop = ThisToThat('Sky',SkyStop,'Head'); close;
     end
     
     %% calculate OpenEphys range & get spiketimes of sorted units
-    OEstart = ThisToThat('Sky',SkyStart,'OE');  %OpenEphys start samplenumber
-    OEstop = ThisToThat('Sky',SkyStop,'OE');  %OpenEphys stop samplenumber
+    OEstart = ThisToThat('Sky',SkyStart,'OE');  close; %OpenEphys start samplenumber
+    OEstop = ThisToThat('Sky',SkyStop,'OE');  close; %OpenEphys stop samplenumber
     
     ephysfolder=Sky.ephysfolder;
     if ismac ephysfolder=macifypath(ephysfolder);end
