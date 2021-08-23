@@ -1,6 +1,6 @@
 function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, or it's OE folder
     InputDataStream = varargin{1};
-    InputEventIndex = varargin{2};
+    InputEventIndex = round(varargin{2});
     OutputDataStream = varargin{3};
     
 %% %%%%%%%%%%%%% load Bonsai/OE info %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -71,7 +71,7 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         Trig2_out = SpecificStructure.TTtimes(end);
         [IdealTime] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
         [c, OutputIndex] = min(abs(SpecificStructure.times-IdealTime));
-        OutputIndex = OutputIndex*2;
+%         OutputIndex = OutputIndex*2;
     end
 
 end

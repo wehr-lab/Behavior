@@ -98,7 +98,7 @@ Sky.csv = dir('Sky_m*.csv');
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add in path to ephys folder
     test = dir(); narrowdown = find([test.isdir]); %identifies folders present in our main experiment folder
-    for k = 1:length(narrowdown)
+    for k = narrowdown
         testing = strsplit(test(k).name,'_mouse-');
         if length(testing) > 1 %then it is a folder with '_mouse-' in its name, so it's almost certainly the OE folder...
             ephysfolder = strcat(test(k).folder,'\',test(k).name);
@@ -163,7 +163,33 @@ video.csv = dir(csvsearch); %timestamps from bonsai
         video.TTtimes = [];                                                         %no triggers were found
         video.TTdur = [];                                                           %no triggers were found
     end
-    video.dur = time(between(video.times(1),video.times(end),'time'));      %duration of video
+    
+% % %     interframeintervals = milliseconds(diff(video.times));
+% % %     figure;
+% % %     plot(interframeintervals,'.');
+% % %     idealNframes = (milliseconds(video.dur)/1000)*30;
+% % %     estimatedDroppedFrames = idealNframes - video.length;
+% % %     figure;
+% % %     plot(video.times,'.'); hold on;
+
+    fieldBframes = interp1(1:video.length,video.times,(1:video.length)+0.5);
+    fieldBframes(end) = video.times(end) + milliseconds(0.0167*1000);
+    
+% % %     plot((1:video.length)+0.5,fieldBframes,'.'); hold on;
+
+    video.times = [video.times';fieldBframes];
+    video.times = video.times(:)';
+    
+% % %     plot(video.times,'k.');
+    
+% % %     video.length = video.length*2;
+    vidobject = VideoReader(video.vid.name);
+    video.length = vidobject.NumberOfFrames;
+    if ~isequal(video.length,length(video.times))
+        video.times = video.times(1:video.length);
+    end
+    video.TTs = (video.TTs*2)-1;
+    video.dur = time(between(video.times(1),video.times(video.length),'time'));      %duration of video
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DLC tracks
     DetectTracking = strcat(CamName,'_m*000.csv'); DetectTracking = dir(DetectTracking); %see if there is a DLC csv in the directory
