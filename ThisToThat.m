@@ -18,7 +18,10 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         cd .. %then back out to the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %and load the behavior file
     end
+    disp('_')
+    disp('Finished loading events and SCTs')
     cd(currentdir); %cd back to whichever directory we started in
+    disp(strcat('Now aligning ',num2str(length(InputEventIndex)), ' inputs'))
     
 %% %%%%%%%%%%%%% get position(s) between trigs %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isequal(InputDataStream,'OE')
@@ -73,7 +76,8 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         [c, OutputIndex] = min(abs(SpecificStructure.times-IdealTime));
 %         OutputIndex = OutputIndex*2;
     end
-
+    
+disp(strcat('Finished aligning ',num2str(length(InputEventIndex)), ' inputs'))
 end
 
 %% Functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -116,7 +120,22 @@ function [SpecificStructure] = String2Struct(InputDataStream)
     end
 end
 function [OutputIndex] = Time2Index(IdealTime, Sky)
+if isequal(IdealTime, 1)
     for i = 1:length(IdealTime)
-        [c, OutputIndex(i)] = min(abs(Sky.times-IdealTime(i)));
+        [~, OutputIndex(i)] = min(abs(Sky.times-IdealTime(i)));
     end
+else
+    [SortedIdealTime,Idx] = sort(IdealTime);
+    i1 =1;
+    for i = 1:length(SortedIdealTime)
+        while (Sky.times(i1)-SortedIdealTime(i))<0
+            i1=i1+1;
+        end
+        [~,x] = min(abs(Sky.times(i1-1:i1)-SortedIdealTime(i)));
+        OutputIndex(i) =  i1+x-2;
+        i1 = i1-1;
+    end
+    newInd(Idx) = 1:length(IdealTime);
+    OutputIndex = OutputIndex(newInd);
+end
 end
