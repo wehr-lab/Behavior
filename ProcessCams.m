@@ -88,12 +88,18 @@ Sky.csv = dir('Sky_m*.csv');
     %%%% We should incorporate a comparison with the number of SCTs for a sanity check here in the future
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DLC tracks
-    DetectTracking = dir('Sky_m*000.csv'); %see if there is a DLC csv in the directory
-    if ~isequal(length(DetectTracking),0) %if so, add the tracked points to the camera structure
+    try %if present, add tracked DLC points to the camera structure
         Sky.dlc.vid = dir('Sky_m*labeled.mp4');
         Sky.dlc.csv = dir('Sky_m*000.csv');
         Sky.dlc.raw = textscan(fopen(Sky.dlc.csv.name),'%q'); Sky.dlc.raw = Sky.dlc.raw{1};
         [Sky] = readDLCOutput(Sky);
+    end
+    try %if present, add filtered DLC points to the camera structure
+        Sky.fdlc.vid = dir('Sky_m*full.mp4');
+        Sky.fdlc.csv = dir('Sky_m*filtered.csv');
+        Sky.fdlc.raw = textscan(fopen(Sky.fdlc.csv.name),'%q'); Sky.fdlc.raw = Sky.fdlc.raw{1};
+%             [Sky] = readmaDLCOutput(Sky);
+        [Sky] = readfDLCOutput(Sky);
     end
         
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add in path to ephys folder
@@ -186,21 +192,59 @@ video.csv = dir(csvsearch); %timestamps from bonsai
     vidobject = VideoReader(video.vid.name);
     video.length = vidobject.NumberOfFrames;
     if ~isequal(video.length,length(video.times))
-        video.times = video.times(1:video.length);
+%         try
+            video.times = video.times(1:video.length);
+%         catch
+%             video.discordant = 1;
+%             video.length = length(video.times);
+%         end
     end
     video.TTs = (video.TTs*2)-1;
     video.dur = time(between(video.times(1),video.times(video.length),'time'));      %duration of video
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DLC tracks
-    DetectTracking = strcat(CamName,'_m*000.csv'); DetectTracking = dir(DetectTracking); %see if there is a DLC csv in the directory
-    if ~isequal(length(DetectTracking),0) %if so, add the tracked points to the camera structure
+    try %if present, add tracked DLC points to the camera structure
         vidsearch = strcat(CamName,'_m*labeled.mp4'); csvsearch = strcat(CamName,'_m*000.csv');
         video.dlc.vid = dir(vidsearch);
         video.dlc.csv = dir(csvsearch);
-        video.dlc.raw = textscan(fopen(video.dlc.csv.name),'%q'); video.dlc.raw = video.dlc.raw{1};
+        video.dlc.raw = textscan(fopen(video.dlc.csv.name),'%q'); video.dlc.raw =  video.dlc.raw{1};
+%             [Sky] = readmaDLCOutput(Sky);
         [video] = readDLCOutput(video);
     end
+    try %if present, add filtered DLC points to the camera structure
+        vidsearch = strcat(CamName,'_m*full.mp4'); csvsearch = strcat(CamName,'_m*filtered.csv');
+        video.fdlc.vid = dir(vidsearch);
+        video.fdlc.csv = dir(csvsearch);
+        video.fdlc.raw = textscan(fopen(video.fdlc.csv.name),'%q'); video.fdlc.raw =  video.fdlc.raw{1};
+%             [Sky] = readmaDLCOutput(Sky);
+        [video] = readfDLCOutput(video);
+    end
     
+end
+function [outputstructure] = readmaDLCOutput(inputstructure) %detects the unique points tracked and integrates them into the camera's matlab structure
+    individuals = strsplit(inputstructure.dlc.raw{2,1},','); individuals = individuals(2:end);
+    titles = strsplit(inputstructure.dlc.raw{3,1},','); titles = titles(2:end);
+    numberofpoints = (length(titles))/3;        %number of unique points tracked
+    u = unique(titles); %the names of each unique point tracked
+    
+    %This snippet identifies the X,Y,&P values in the csv for each unique tracked point in the csv file
+    for i = 1:numberofpoints
+        columnIdx = [];
+        for ii = 1:length(titles)
+            columnIdx = [columnIdx;isequal(u(i),{titles{ii}})];
+        end
+        columns{1,i} = u(i);
+        columns{2,i} = find(columnIdx);
+    end
+    numberofframes = length(inputstructure.dlc.raw)-4;
+    for i = 1:numberofpoints
+        name = string(columns{1,i});
+        inputstructure.dlc.(char(name)) = dlmread(inputstructure.dlc.csv.name,',',[4,columns{2,i}(1),numberofframes+3,columns{2,i}(end)]);
+    end
+    %End of snippet
+    
+    inputstructure.numberofpoints = numberofpoints;
+    outputstructure = inputstructure;
 end
 function [outputstructure] = readDLCOutput(inputstructure) %detects the unique points tracked and integrates them into the camera's matlab structure
     titles = strsplit(inputstructure.dlc.raw{2,1},','); titles = titles(2:end);
@@ -220,6 +264,30 @@ function [outputstructure] = readDLCOutput(inputstructure) %detects the unique p
     for i = 1:numberofpoints
         name = string(columns{1,i});
         inputstructure.dlc.(char(name)) = dlmread(inputstructure.dlc.csv.name,',',[3,columns{2,i}(1),numberofframes+2,columns{2,i}(end)]);
+    end
+    %End of snippet
+    
+    inputstructure.numberofpoints = numberofpoints;
+    outputstructure = inputstructure;
+end
+function [outputstructure] = readfDLCOutput(inputstructure) %detects the unique points tracked and integrates them into the camera's matlab structure
+    titles = strsplit(inputstructure.fdlc.raw{2,1},','); titles = titles(2:end);
+    numberofpoints = (length(titles))/3;        %number of unique points tracked
+    u = unique(titles); %the names of each unique point tracked
+    
+    %This snippet identifies the X,Y,&P values in the csv for each unique tracked point in the csv file
+    for i = 1:numberofpoints
+        columnIdx = [];
+        for ii = 1:length(titles)
+            columnIdx = [columnIdx;isequal(u(i),{titles{ii}})];
+        end
+        columns{1,i} = u(i);
+        columns{2,i} = find(columnIdx);
+    end
+    numberofframes = length(inputstructure.fdlc.raw)-3;
+    for i = 1:numberofpoints
+        name = string(columns{1,i});
+        inputstructure.fdlc.(char(name)) = dlmread(inputstructure.fdlc.csv.name,',',[3,columns{2,i}(1),numberofframes+2,columns{2,i}(end)]);
     end
     %End of snippet
     

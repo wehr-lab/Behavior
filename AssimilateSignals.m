@@ -66,16 +66,6 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     chans(3).name = 'ACCLRM-LR';
     chans(3).file = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
     
-    %Additional chans are single channels, if desired
-    [phys] = GetPhysiology(Sky);
-    if length(phys)>1
-        for i = 1:length(phys)
-            chans(i+3).name = phys(i).Area;
-            chans(i+3).file = strcat(Sky.ephysfolder,'\',phys(i).filename);
-        end
-    else
-    end
-    
     for i = 1:length(chans)
         chans(i).start = OEstart;
         chans(i).stop  = OEstop;
