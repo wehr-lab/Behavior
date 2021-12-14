@@ -16,20 +16,24 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     vids(1).file = strcat(Sky.vid.folder,'\',Sky.vid.name);
     vids(1).start = SkyStart;
     vids(1).stop = SkyStop;
+    vids(1).sampleRate = Sky.vid.framerate;
     
     if exist('Lear','var')
         vids(3).name = 'Lear';
         vids(3).file = strcat(Lear.vid.folder,'\',Lear.vid.name);
         vids(3).start = ThisToThat('Sky',SkyStart,'Lear'); close;
         vids(3).stop = ThisToThat('Sky',SkyStop,'Lear'); close;
+        vids(3).sampleRate = Lear.vid.framerate;
         vids(4).name = 'Rear';
         vids(4).file = strcat(Rear.vid.folder,'\',Rear.vid.name);
         vids(4).start = ThisToThat('Sky',SkyStart,'Rear'); close;
         vids(4).stop = ThisToThat('Sky',SkyStop,'Rear'); close;
+        vids(4).sampleRate = Rear.vid.framerate;
         vids(2).name = 'Head';
         vids(2).file = strcat(Head.vid.folder,'\',Head.vid.name);
         vids(2).start = ThisToThat('Sky',SkyStart,'Head'); close;
         vids(2).stop = ThisToThat('Sky',SkyStop,'Head'); close;
+        vids(2).sampleRate = Head.vid.framerate;
     end
     
     %% calculate OpenEphys range & get spiketimes of sorted units
