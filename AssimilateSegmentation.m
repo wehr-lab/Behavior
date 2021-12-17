@@ -21,8 +21,8 @@ for i = 1:length(test)
         if ~isempty(units)
             units(1).(event) = ThisToThat('Sky',Seg.(event),'OE'); close;
             units(1).(event) = (units(1).(event)) / units(1).sampleRate;
-            for i = 2:length(chans)
-                chans(i).(event) = chans(1).(event);
+            for i = 2:length(units)
+                units(i).(event) = units(1).(event);
             end
         end
         

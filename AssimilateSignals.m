@@ -57,7 +57,7 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         end
     catch
         disp('no SortedUnits.mat file found')
-        units = {};
+        units = [];
     end
     
 %% declare Continuous traces & calculate ranges

@@ -192,12 +192,13 @@ video.csv = dir(csvsearch); %timestamps from bonsai
     vidobject = VideoReader(video.vid.name);
     video.length = vidobject.NumberOfFrames;
     if ~isequal(video.length,length(video.times))
-%         try
+        try
             video.times = video.times(1:video.length);
-%         catch
-%             video.discordant = 1;
-%             video.length = length(video.times);
-%         end
+        catch
+            flagVariable = video;
+            save('Flag_discordant.mat','flagVariable');
+            video.length = length(video.times);
+        end
     end
     video.TTs = (video.TTs*2)-1;
     video.dur = time(between(video.times(1),video.times(video.length),'time'));      %duration of video
