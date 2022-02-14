@@ -71,13 +71,16 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     chans(3).file = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
     
     for i = 1:length(chans)
+        if isequal(i,1)
+            [rawdata, ~, info] = load_open_ephys_data(chans(1).file); 
+            chans(i).Length = length(rawdata); clear rawdata;
+            chans(i).sampleRate = info.header.sampleRate;
+        else
+            chans(i).Length = chans(1).Length;
+            chans(i).sampleRate = chans(1).sampleRate;
+        end
         chans(i).start = OEstart;
         chans(i).stop  = OEstop;
-        try
-            chans(i).sampleRate = sampleRate;
-        catch
-            chans(i).sampleRate = 30000;
-        end
     end
     %% return to bonsai folder
     skyvidfolder=Sky.vid.folder;
