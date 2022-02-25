@@ -16,25 +16,29 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     vids(1).file = strcat(Sky.vid.folder,'\',Sky.vid.name);
     vids(1).start = SkyStart;
     vids(1).stop = SkyStop;
+    vids(1).sampleRate = Sky.vid.framerate;
     
     if exist('Lear','var')
         vids(3).name = 'Lear';
         vids(3).file = strcat(Lear.vid.folder,'\',Lear.vid.name);
-        vids(3).start = ThisToThat('Sky',SkyStart,'Lear');
-        vids(3).stop = ThisToThat('Sky',SkyStop,'Lear');
+        vids(3).start = ThisToThat('Sky',SkyStart,'Lear'); close;
+        vids(3).stop = ThisToThat('Sky',SkyStop,'Lear'); close;
+        vids(3).sampleRate = Lear.vid.framerate;
         vids(4).name = 'Rear';
         vids(4).file = strcat(Rear.vid.folder,'\',Rear.vid.name);
-        vids(4).start = ThisToThat('Sky',SkyStart,'Rear');
-        vids(4).stop = ThisToThat('Sky',SkyStop,'Rear');
+        vids(4).start = ThisToThat('Sky',SkyStart,'Rear'); close;
+        vids(4).stop = ThisToThat('Sky',SkyStop,'Rear'); close;
+        vids(4).sampleRate = Rear.vid.framerate;
         vids(2).name = 'Head';
         vids(2).file = strcat(Head.vid.folder,'\',Head.vid.name);
-        vids(2).start = ThisToThat('Sky',SkyStart,'Head');
-        vids(2).stop = ThisToThat('Sky',SkyStop,'Head');
+        vids(2).start = ThisToThat('Sky',SkyStart,'Head'); close;
+        vids(2).stop = ThisToThat('Sky',SkyStop,'Head'); close;
+        vids(2).sampleRate = Head.vid.framerate;
     end
     
     %% calculate OpenEphys range & get spiketimes of sorted units
-    OEstart = ThisToThat('Sky',SkyStart,'OE');  %OpenEphys start samplenumber
-    OEstop = ThisToThat('Sky',SkyStop,'OE');  %OpenEphys stop samplenumber
+    OEstart = ThisToThat('Sky',SkyStart,'OE');  close; %OpenEphys start samplenumber
+    OEstop = ThisToThat('Sky',SkyStop,'OE');  close; %OpenEphys stop samplenumber
     
     ephysfolder=Sky.ephysfolder;
     if ismac ephysfolder=macifypath(ephysfolder);end
@@ -68,20 +72,17 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     chans(3).name = 'ACCLRM-LR';
     chans(3).file = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
     
-    %Additional chans are single channels, if desired
-    [phys] = GetPhysiology(Sky);
-    if length(phys)>1
-        for i = 1:length(phys)
-            chans(i+3).name = phys(i).Area;
-            chans(i+3).file = strcat(Sky.ephysfolder,'\',phys(i).filename);
-        end
-    else
-    end
-    
     for i = 1:length(chans)
+        if isequal(i,1)
+            [rawdata, ~, info] = load_open_ephys_data(chans(1).file); 
+            chans(i).Length = length(rawdata); clear rawdata;
+            chans(i).sampleRate = info.header.sampleRate;
+        else
+            chans(i).Length = chans(1).Length;
+            chans(i).sampleRate = chans(1).sampleRate;
+        end
         chans(i).start = OEstart;
         chans(i).stop  = OEstop;
-        chans(i).sampleRate = sampleRate;
     end
     %% return to bonsai folder
     skyvidfolder=Sky.vid.folder;

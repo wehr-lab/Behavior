@@ -75,7 +75,7 @@ elseif isequal(choice,'Head')
     for i = 1:length(SelectedFolders)
         HeadFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Head_m*.mp4'));
         for ii = 1:length(HeadFiles{i,1})
-            if length(HeadFiles{i,1}(ii).name) == 38
+            if length(HeadFiles{i,1}(ii).name) == 39
                 v_list{i,1} = strcat(HeadFiles{i,1}(ii).folder,'\',HeadFiles{i,1}(ii).name);
             end
         end
@@ -84,7 +84,7 @@ elseif isequal(choice,'Forw')
     for i = 1:length(SelectedFolders)
         ForwFiles{i,1} = dir(fullfile(SelectedFolders{i}, '**', 'Forw_m*.mp4'));
         for ii = 1:length(ForwFiles{i,1})
-            if length(ForwFiles{i,1}(ii).name) == 38
+            if length(ForwFiles{i,1}(ii).name) == 39
                 v_list{i,1} = strcat(ForwFiles{i,1}(ii).folder,'\',ForwFiles{i,1}(ii).name);
             end
         end

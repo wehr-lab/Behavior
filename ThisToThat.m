@@ -1,6 +1,6 @@
 function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, or it's OE folder
     InputDataStream = varargin{1};
-    InputEventIndex = varargin{2};
+    InputEventIndex = round(varargin{2});
     OutputDataStream = varargin{3};
     
 %% %%%%%%%%%%%%% load Bonsai/OE info %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -18,13 +18,22 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         cd .. %then back out to the bonsai folder
         behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %and load the behavior file
     end
+    disp('_')
+    disp('Finished loading events and SCTs')
     cd(currentdir); %cd back to whichever directory we started in
+    disp(strcat('Now aligning ',num2str(length(InputEventIndex)), ' inputs'))
     
 %% %%%%%%%%%%%%% get position(s) between trigs %%%%%%%%%%%%%%%%%%%%%%%%%%%%
     if isequal(InputDataStream,'OE')
-        Trig1_in = (Events(1).message_timestamp_samples);
-        Trig2_in = (Events(end).message_timestamp_samples);
-        [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+        if ~isnan(Events(1).soundcard_trigger_timestamp_sec) %default to using the SCTs
+            Trig1_in = (Events(1).soundcard_trigger_timestamp_sec)*30000;
+            Trig2_in = (Events(end).soundcard_trigger_timestamp_sec)*30000;
+            [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+        else %but use the events if SCTs not recorded (GetEventsAndSCT_Timestamps will warn you in this case)
+            Trig1_in = (Events(1).message_timestamp_samples);
+            Trig2_in = (Events(end).message_timestamp_samples);
+            [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+        end
         
     elseif isequal(InputDataStream,'Sky')
         InputEventTime = Sky.times(InputEventIndex);
@@ -38,20 +47,26 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         Trig1_inTime = Sky.TTtimes(1);
         Trig2_inTime = Sky.TTtimes(end);
         [TrigRatio] = GetTrigRatio(InputEventTime,Trig1_inTime,Trig2_inTime);
-        
     end
 
 %% %%%%%% find equivalent sample between trigs, add offset by trig1 %%%%%%%
     if isequal(OutputDataStream,'OE')
-        Trig1_out = (Events(1).message_timestamp_samples);
-        Trig2_out = (Events(end).message_timestamp_samples);
-        [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+        if ~isnan(Events(1).soundcard_trigger_timestamp_sec) %default to using the SCTs
+            Trig1_out = (Events(1).soundcard_trigger_timestamp_sec)*30000;
+            Trig2_out = (Events(end).soundcard_trigger_timestamp_sec)*30000;
+            [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+        else %but use the events if SCTs not recorded (GetEventsAndSCT_Timestamps will warn you in this case)
+            Trig1_out = (Events(1).message_timestamp_samples);
+            Trig2_out = (Events(end).message_timestamp_samples);
+            [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+        end
         
     elseif isequal(OutputDataStream,'Sky')
         Trig1_out = Sky.TTtimes(1);
         Trig2_out = Sky.TTtimes(end);
         [IdealTime] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
-        [c, OutputIndex] = min(abs(Sky.times-IdealTime));
+%         [c, OutputIndex] = min(abs(Sky.times-IdealTime));
+        [OutputIndex] = Time2Index(IdealTime, Sky);
         
     else %Headcam data
         [SpecificStructure] = String2Struct(OutputDataStream);
@@ -59,9 +74,10 @@ function [OutputIndex] = ThisToThat(varargin) %Run in either the bonsai folder, 
         Trig2_out = SpecificStructure.TTtimes(end);
         [IdealTime] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
         [c, OutputIndex] = min(abs(SpecificStructure.times-IdealTime));
-        OutputIndex = OutputIndex*2;
+%         OutputIndex = OutputIndex*2;
     end
-
+    
+disp(strcat('Finished aligning ',num2str(length(InputEventIndex)), ' inputs'))
 end
 
 %% Functions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -102,4 +118,24 @@ function [SpecificStructure] = String2Struct(InputDataStream)
     elseif isequal(InputDataStream,'Forw')
         SpecificStructure = Forw;
     end
+end
+function [OutputIndex] = Time2Index(IdealTime, Sky)
+if isequal(IdealTime, 1)
+    for i = 1:length(IdealTime)
+        [~, OutputIndex(i)] = min(abs(Sky.times-IdealTime(i)));
+    end
+else
+    [SortedIdealTime,Idx] = sort(IdealTime);
+    i1 =1;
+    for i = 1:length(SortedIdealTime)
+        while (Sky.times(i1)-SortedIdealTime(i))<0
+            i1=i1+1;
+        end
+        [~,x] = min(abs(Sky.times(i1-1:i1)-SortedIdealTime(i)));
+        OutputIndex(i) =  i1+x-2;
+        i1 = i1-1;
+    end
+    newInd(Idx) = 1:length(IdealTime);
+    OutputIndex = OutputIndex(newInd);
+end
 end
