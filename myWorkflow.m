@@ -33,7 +33,6 @@ for i = 1:length(Bdirs)
     if ismac ephysfolder=macifypath(ephysfolder);end
     cd(ephysfolder) %cd to the OE folder for this trial
     [SortedUnits,sampleRate] = ProcessSpikes(); %SortedUnits.spiketimes = spiketimes for this trial, in seconds after the start of acquisition for this trial
-    save('SortedUnits','SortedUnits','sampleRate'); %saved as 'SortedUnits.mat' in the OE folder
 end
 
 %% Assimilate Signals: Makes a file with alignment information for all your data-streams

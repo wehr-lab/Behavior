@@ -54,6 +54,8 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     catch
         disp('no SortedUnits.mat file found')
         units = {};
+        %if you think there should be sorted units, maybe you still need to run
+        %ProcessSpikes
     end
     
 %% declare Continuous traces & calculate ranges
