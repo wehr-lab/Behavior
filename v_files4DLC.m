@@ -1,6 +1,10 @@
 function [v_string,v_files] = v_files4DLC(varargin) %Generates a string of specified videos for input into DLC from folders of your choosing
-%%%%%   varargin1 = the camera files you want to select ex)'Sky', 'Leye', or 'Reye'
-%%%%%   varargin2 = (optional) a predetermined list of folders that you want to generate a v_string from, to input into DLC
+% inputs (all optional):
+%   varargin1 = the camera files you want to select ex)'Sky', 'Leye', or 'Reye'
+%   varargin2 = (optional) a predetermined list of folders that you want to generate a v_string from, to input into DLC
+%outputs
+%   v_string = a string with the list of files suitable to enter into DLC
+%   v_files = cell array of filenames (same as v_string but as a cell array)
 
 choice = varargin{1};
 if nargin == 2
