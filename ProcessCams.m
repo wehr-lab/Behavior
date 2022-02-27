@@ -5,21 +5,30 @@ function ProcessCams(varargin)
 
 %% Analog Cams:
 if nargin>=1
-    [Head] = GetAnalogVideo('Head',Sky.TTtimes);
-    [Lear] = GetAnalogVideo('Lear',Sky.TTtimes);
-    [Rear] = GetAnalogVideo('Rear',Sky.TTtimes);
+    if isequal(varargin{1},'Rig2')
+        [Head] = GetAnalogVideo('Head',Sky.TTtimes);
+        [Reye] = GetAnalogVideo('Reye',Sky.TTtimes);
+    else
+        [Head] = GetAnalogVideo('Head',Sky.TTtimes);
+        [Lear] = GetAnalogVideo('Lear',Sky.TTtimes);
+        [Rear] = GetAnalogVideo('Rear',Sky.TTtimes);
 %     [Forw] = GetAnalogVideo('Forw',Sky.TTtimes);
 %     [Leye] = GetAnalogVideo('Leye',Sky.TTtimes);
 %     [Reye] = GetAnalogVideo('Reye',Sky.TTtimes);
 %     [Eye] = GetAnalogVideo('Eye',Sky.TTtimes);
+    end
 end
 
 %% Save the camera structures in a .mat file named 'Behavior_mouse-IDnm_YYYY-MM-DDTHH_MM_SS.mat'
 Behavior = strcat('Behavior', Sky.vid.name(4:34));
 if nargin>=1
-    save(Behavior,'Sky','Head','Lear','Rear')
+    if isequal(varargin{1},'Rig2')
+        save(Behavior,'Sky','Head','Reye');
+    else
+        save(Behavior,'Sky','Head','Lear','Rear')
+    end
 else
-    save(Behavior,'Sky')
+   save(Behavior,'Sky'); 
 end
 
 end
@@ -56,7 +65,15 @@ Sky.csv = dir('Sky_m*.csv');
         Sky.times(i,:) = strrep(Sky.times(i,:),'T','_');
     end
     Sky.times = datetime(Sky.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
-
+    if ~isequal(Sky.length,obj.NumberOfFrames)
+        Sky.length = obj.NumberOfFrames;
+        try
+            Sky.times = Sky.times(1:Sky.length);
+        catch
+            flagVariable = Sky;
+            save('Flag_discordant.mat','flagVariable');
+        end
+    end
     Sky.TTL = dir('TTL_m*.csv'); Sky.TTL = textscan(fopen(Sky.TTL.name),'%q'); Sky.TTL = Sky.TTL{1,1};
     Sky.TTL = Sky.TTL(1:2:end,:); %trigger values
     Sky.TTs = find(~cellfun(@isempty,strfind(Sky.TTL,'True'))); %Framenumber for all triggered SkyCam frames
@@ -202,11 +219,11 @@ video.csv = dir(csvsearch); %timestamps from bonsai
         catch
             flagVariable = video;
             save('Flag_discordant.mat','flagVariable');
-            video.length = length(video.times);
+%             video.length = length(video.times);
         end
     end
     video.TTs = (video.TTs*2)-1;
-    video.dur = time(between(video.times(1),video.times(video.length),'time'));      %duration of video
+    video.dur = time(between(video.times(1),video.times(end),'time'));      %duration of video
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DLC tracks
     try %if present, add tracked DLC points to the camera structure
