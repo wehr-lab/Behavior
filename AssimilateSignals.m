@@ -18,7 +18,18 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     vids(1).stop = SkyStop;
     vids(1).sampleRate = Sky.vid.framerate;
     
-    if exist('Lear','var')
+    if exist('Reye','var') %Rig2
+        vids(2).name = 'Head';
+        vids(2).file = strcat(Head.vid.folder,'\',Head.vid.name);
+        vids(2).start = ThisToThat('Sky',SkyStart,'Head'); close;
+        vids(2).stop = ThisToThat('Sky',SkyStop,'Head'); close;
+        vids(2).sampleRate = Head.vid.framerate;
+        vids(3).name = 'Reye';
+        vids(3).file = strcat(Reye.vid.folder,'\',Reye.vid.name);
+        vids(3).start = ThisToThat('Sky',SkyStart,'Reye'); close;
+        vids(3).stop = ThisToThat('Sky',SkyStop,'Reye'); close;
+        vids(3).sampleRate = Reye.vid.framerate;
+    elseif exist('Lear','var')
         vids(3).name = 'Lear';
         vids(3).file = strcat(Lear.vid.folder,'\',Lear.vid.name);
         vids(3).start = ThisToThat('Sky',SkyStart,'Lear'); close;
@@ -89,22 +100,4 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     if ismac skyvidfolder=macifypath(skyvidfolder);end
     cd(skyvidfolder)
     
-end
-
-function [phys] = GetPhysiology(Sky)
-if exist('E:\Nick\MouseConfigurations', 'dir')
-        currentdir = pwd; %remember where we started
-        mouseID = strsplit(Sky.ephysfolder,'mouse-'); mouseID = mouseID{end};
-        cd('E:\Nick\MouseConfigurations')
-        configurationfile = strcat('mouse', mouseID, '.mat');
-        try
-            load(configurationfile);
-        catch
-            PhysConfig = []; %no configuration file = all channels/TTs are in one brain location
-        end
-        phys = PhysConfig;
-        cd(currentdir);
-    else
-        phys = [];
-    end
 end
