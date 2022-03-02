@@ -1,28 +1,40 @@
 function ProcessCams(varargin)
+%Input1:
+    %For Rig2 before blackfly: 'Rig2old'
+    %For Rig2 after blackfly: 'Rig2'
+    %For Rig4: no input
 
-%% Sky Cam:
-[Sky] = GetSkyVideo();
-
-%% Analog Cams:
+%% Step1: Process information from the cameras:
 if nargin>=1
     if isequal(varargin{1},'Rig2')
+        [Sky] = GetSkyVideo();
+        [Head] = GetAnalogVideo('Head',Sky.TTtimes);
+        [Reye] = GetAnalogVideo('Reye',Sky.TTtimes);
+    elseif isequal(varargin{1},'Rig2old')
+        [Sky] = GetSkyVideoRig2old();
         [Head] = GetAnalogVideo('Head',Sky.TTtimes);
         [Reye] = GetAnalogVideo('Reye',Sky.TTtimes);
     else
+        [Sky] = GetSkyVideo();
         [Head] = GetAnalogVideo('Head',Sky.TTtimes);
         [Lear] = GetAnalogVideo('Lear',Sky.TTtimes);
         [Rear] = GetAnalogVideo('Rear',Sky.TTtimes);
-%     [Forw] = GetAnalogVideo('Forw',Sky.TTtimes);
-%     [Leye] = GetAnalogVideo('Leye',Sky.TTtimes);
-%     [Reye] = GetAnalogVideo('Reye',Sky.TTtimes);
-%     [Eye] = GetAnalogVideo('Eye',Sky.TTtimes);
     end
+else
+    [Sky] = GetSkyVideo();
 end
 
-%% Save the camera structures in a .mat file named 'Behavior_mouse-IDnm_YYYY-MM-DDTHH_MM_SS.mat'
-Behavior = strcat('Behavior', Sky.vid.name(4:34));
+%% Step2: Save the camera structures in a .mat file named 'Behavior_mouse-IDnm_YYYY-MM-DDTHH_MM_SS.mat'
+try
+    Behavior = strcat('Behavior', Sky.vid.name(4:34));
+catch %Rig2old
+    Behavior = strcat('Behavior_mouse-', Sky.vid.name(5:28)); 
+end
+
 if nargin>=1
     if isequal(varargin{1},'Rig2')
+        save(Behavior,'Sky','Head','Reye');
+    elseif isequal(varargin{1},'Rig2old')
         save(Behavior,'Sky','Head','Reye');
     else
         save(Behavior,'Sky','Head','Lear','Rear')
@@ -318,27 +330,109 @@ function [outputstructure] = readmaDLCOutput(inputstructure) %detects the unique
     inputstructure.numberofpoints = numberofpoints;
     outputstructure = inputstructure;
 end
-function [Skyframe] = DI2Sky(varargin) %varargin = InputVid,DIframe
 
-    %Returns Skyframe# closest in time to InputVidFrame#
-    InputVid = varargin{1};
-    DIframe = varargin{2};
-    Sky = varargin{3};
-    
-    test = milliseconds(InputVid.times(DIframe) - Sky.times);
-    frame = find(test<0,1);
-    if isempty(frame)
-        frame = length(test);
+function [Sky] = GetSkyVideoRig2old(varargin) %Returns a structure with video information
+Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
+    if length(Sky.vid) < 1
+        error('Couldnt find Sky video')
     end
-    timeaftertime = milliseconds(Sky.times(frame)-InputVid.times(DIframe));
-    timebefortime = milliseconds(Sky.times(frame-1)-InputVid.times(DIframe));
-    
-    if abs(timeaftertime)<abs(timebefortime)
-        Skyframe = frame;
-    elseif abs(timebefortime)<abs(timeaftertime)
-        Skyframe = frame-1;
-    elseif abs(timebefortime)==abs(timeaftertime)
-        Skyframe = frame-1;
+    if length(Sky.vid) > 1
+        for i = 1:length(Sky.vid)
+            if length(Sky.vid(i).name) == 32
+                Sky.vid = Sky.vid(i); %choose raw video instead of DLC-labeled video if present in the folder
+                break
+            end
+        end
     end
-
+    obj = VideoReader(Sky.vid.name);
+    Sky.vid.framerate = obj.FrameRate;
+Sky.csv = dir('Sky_*.csv');
+    if length(Sky.csv) > 1
+        for i = 1:length(Sky.csv)
+            if length(Sky.csv(i).name) == 32
+                Sky.csv = Sky.csv(i); %choose timestamp csv instead of DLC csv if one is present in the folder
+                break
+            end
+        end
+    end
+    Sky.times = textscan(fopen(Sky.csv.name),'%q'); Sky.times = Sky.times{1,1};
+    Sky.times = Sky.times(17:17:end,:); Sky.times = cell2mat(Sky.times); Sky.times = Sky.times(:,1:27);
+    Sky.length = length(Sky.times);
+    for i=1:Sky.length
+        Sky.times(i,:) = strrep(Sky.times(i,:),'T','_');
+    end
+    Sky.times = datetime(Sky.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
+    if ~isequal(Sky.length,obj.NumberOfFrames)
+        Sky.length = obj.NumberOfFrames;
+        try
+            Sky.times = Sky.times(1:Sky.length);
+        catch
+            flagVariable = Sky;
+            save('Flag_discordant.mat','flagVariable');
+        end
+    end
+    Sky.TTL = dir('TTL_*.csv'); Sky.TTL = textscan(fopen(Sky.TTL.name),'%q'); Sky.TTL = Sky.TTL{1,1};
+    Sky.TTL = Sky.TTL(1:2:end,:); %trigger values
+    Sky.TTs = find(~cellfun(@isempty,strfind(Sky.TTL,'True'))); %Framenumber for all triggered SkyCam frames
+    
+    %%%% This snippet here identifies the onset frame for each LED pulse,
+    %%%% and saves them as Sky.TTs (which stands for 'TrueTriggers')
+    temp = ones(size(length(Sky.TTs))); temp(1) = 90;
+    for i=2:length(Sky.TTs)
+        temp(i)=Sky.TTs(i)-Sky.TTs(i-1); %subtract previous trigger framenumber.
+    end
+    temp = temp - ones(size(temp)); temp = find(temp);
+    try
+        Sky.TTs = Sky.TTs(temp(1,:),1);
+    catch
+        Sky.TTs = [];
+        disp('No LED triggers found!')
+    end
+    clear temp;
+    %%%% End of that snippet
+    
+    Sky.TTtimes = Sky.times(Sky.TTs,1);                                     %timestamps for each trigger
+    Sky.NumberOfTrigs = length(Sky.TTs);                                    %number of triggers detected
+    try
+        Sky.TTdur = time(between(Sky.TTtimes(1),Sky.TTtimes(end),'time'));      %duration of video between first and last trigger
+    catch
+        Sky.TTdur = [];
+    end
+    Sky.dur = time(between(Sky.times(1),Sky.times(end),'time'));            %duration of video
+    %%%% We should incorporate a comparison with the number of SCTs for a sanity check here in the future
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% DLC tracks
+    try %if present, add tracked DLC points to the camera structure
+        Sky.dlc.vid = dir('Sky_m*0_labeled.mp4');
+        Sky.dlc.csv = dir('Sky_m*000.csv');
+        Sky.dlc.raw = textscan(fopen(Sky.dlc.csv.name),'%q'); Sky.dlc.raw = Sky.dlc.raw{1};
+        [Sky] = readDLCOutput(Sky);
+    end
+    try %if present, add filtered DLC points to the camera structure
+        Sky.fdlc.vid = dir('Sky_m*filtered_labeled.mp4');
+        Sky.fdlc.csv = dir('Sky_m*0_filtered.csv');
+        Sky.fdlc.raw = textscan(fopen(Sky.fdlc.csv.name),'%q'); Sky.fdlc.raw = Sky.fdlc.raw{1};
+        [Sky] = readfDLCOutput(Sky);
+    end
+    try %if present, add maDLC points to the camera structure
+        Sky.madlc.vid = dir('Sky_m*0_el_bp_labeled.mp4');
+        Sky.madlc.csv = dir('Sky_m*0_el_filtered.csv');
+        Sky.madlc.raw = textscan(fopen(Sky.madlc.csv.name),'%q'); Sky.madlc.raw = Sky.madlc.raw{1};
+        [Sky] = readmaDLCOutput(Sky);
+    end
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add in path to ephys folder
+    test = dir(); narrowdown = find([test.isdir]); %identifies folders present in our main experiment folder
+    for k = narrowdown
+        testing = strsplit(test(k).name,'_mouse-');
+        if length(testing) > 1 %then it is a folder with '_mouse-' in its name, so it's almost certainly the OE folder...
+            ephysfolder = strcat(test(k).folder,'\',test(k).name);
+        end
+    end
+    try
+        Sky.ephysfolder = ephysfolder;
+    catch
+        Sky.ephysfolder = []; %no ephys folder found for this experiment
+    end
+    
 end
