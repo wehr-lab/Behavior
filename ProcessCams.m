@@ -1,4 +1,4 @@
-function ProcessCams(varargin)
+function [BehaviorFile] = ProcessCams(varargin)
 %Input1:
     %For Rig2 before blackfly: 'Rig2old'
     %For Rig2 after blackfly: 'Rig2'
@@ -26,21 +26,21 @@ end
 
 %% Step2: Save the camera structures in a .mat file named 'Behavior_mouse-IDnm_YYYY-MM-DDTHH_MM_SS.mat'
 try
-    Behavior = strcat('Behavior', Sky.vid.name(4:34));
+    BehaviorFile = strcat(pwd,'\Behavior', Sky.vid.name(4:34),'.mat');
 catch %Rig2old
-    Behavior = strcat('Behavior_mouse-', Sky.vid.name(5:28)); 
+    BehaviorFile = strcat(pwd,'\Behavior_mouse-', Sky.vid.name(5:28),'.mat'); 
 end
 
 if nargin>=1
     if isequal(varargin{1},'Rig2')
-        save(Behavior,'Sky','Head','Reye');
+        save(BehaviorFile,'Sky','Head','Reye');
     elseif isequal(varargin{1},'Rig2old')
-        save(Behavior,'Sky','Head','Reye');
+        save(BehaviorFile,'Sky','Head','Reye');
     else
-        save(Behavior,'Sky','Head','Lear','Rear')
+        save(BehaviorFile,'Sky','Head','Lear','Rear')
     end
 else
-   save(Behavior,'Sky'); 
+   save(BehaviorFile,'Sky');
 end
 
 end
