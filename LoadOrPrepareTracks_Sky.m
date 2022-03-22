@@ -1,21 +1,39 @@
-%load the behavior and assimilation file, then run this script
-SkyDLCtype = 'madlc'; %'dlc' 'fdlc' or 'madlc'
-pThresh = 0.95; %DLC probability threshold
-SmoothValue = 75;
-Skysavename = strcat('PreparedSky_',SkyDLCtype,'_p',num2str(pThresh*100),'_s',num2str(SmoothValue),'.mat');
-CricketTableIndices = [3,4];
+%load the behavior file
+    test = dir('Beh*.mat');
+    load(test.name);
+%load the AssimilationSeg.mat file
+    load('AssimilationSeg.mat');
 
-try
-    load(Skysavename);
-catch
-    SkyVideo = VideoReader(vids(1).file); SkySize = [SkyVideo.Width,SkyVideo.Height];
-        [s1] = GetCamPtsY(Sky.(SkyDLCtype),SkySize); 
-        [s1] = FitCircle(s1,SkyVideo,SkySize);
-        [s1,rectN] = RelateSkyCam(s1,pThresh,SmoothValue,CricketTableIndices);
-    save(Skysavename,'s1','rectN')
-end
+SkyDLCtype = 'dlc'; %'dlc' 'fdlc' or 'madlc'
+pThresh = 0.95; %DLC probability threshold
+CricketTableIndices = [3,4];
+CricketFrameRange = [vids(find(cellfun(@(v)any(isequal(v,'Sky')),{vids.name}),1)).Land, vids(find(cellfun(@(v)any(isequal(v,'Sky')),{vids.name}),1)).TerminalCap];
+
+[s1,rectN] = PrepareTracks_Sky(Sky,SkyDLCtype,pThresh,CricketTableIndices,CricketFrameRange);
+
+SmoothValue = 75;
+[s1] = SmoothPoints(s1,CricketTableIndices,SmoothValue,CricketFrameRange);
+MousePointsToSmooth = [5,9,13];
+[s1] = SmoothPoints(s1,MousePointsToSmooth,SmoothValue);
+
+MusHeadBack = GetMidpoints(s1.t.Lear,s1.t.Rear);
+MusHeadFront = s1.t.HCleft;
+Cricket = s1.t.Cpost;
+VideoFs = Sky.vid.framerate;
+Circ = s1.Circ;
+
+[saveID] = GetIDstring(Sky);
+skysaveID.path = 'E:';
+skysaveID.string = saveID;
+[out] = CalculateMetricsSky(MusHeadBack,MusHeadFront,Cricket,VideoFs,Circ,skysaveID);
 
 %% Coordinate/DLC Functions:
+function [s1,rectN] = PrepareTracks_Sky(Sky,SkyDLCtype,pThresh,CricketTableIndices,CricketFrameRange)
+SkyVideo = VideoReader(Sky.vid.name); SkySize = [SkyVideo.Width,SkyVideo.Height];
+[s1] = GetCamPtsY(Sky.(SkyDLCtype),SkySize); 
+[s1] = FitCircle(s1,SkyVideo,SkySize);
+[s1,rectN] = RelateSkyCam(s1,pThresh,CricketTableIndices,CricketFrameRange);
+end
 function [newStruct] = GetCamPtsY(CamStruct,CamSize)
 fields = fieldnames(CamStruct); C = struct2cell(CamStruct);
 newStruct = struct(); newStruct.t = table();
@@ -96,9 +114,23 @@ end
     end
     outputxypts = xypts;
 end
-
+function [s1] = FitCircle(s1,SkyVideo,SkySize)
+try
+    test = dir('Circ*.mat');
+    load(test(1).name);
+    Circ.center = flipYcoordinate(Circ.center',SkySize);
+    Circ.input = flipYcoordinate(Circ.input,SkySize);
+catch
+    FitCircleGUI(SkyVideo,SkySize);
+    test = dir('Circ*.mat');
+    load(test(1).name);
+    Circ.center = flipYcoordinate(Circ.center',SkySize);
+    Circ.input = flipYcoordinate(Circ.input,SkySize);
+end
+s1.Circ = Circ;
+end
 function [s1,rect] = RelateSkyCam(varargin)
-s1 = varargin{1}; pThresh = varargin{2}; SmoothValue = varargin{3};
+s1 = varargin{1}; pThresh = varargin{2};
 cropW = s1.size(2); cropH = s1.size(2); %cp = [s1.size(1)/2,s1.size(2)/2];
 cp = [s1.Circ.center(1),s1.size(2)/2];
 [rect] = MakeCropBox(cp,cropW,cropH,s1.size);
@@ -115,36 +147,32 @@ for i = 1:width(s1.t)
     
     %Identify GoodFrames:
     pValues = s1.t{:,i}(:,3);
-%     if isequal(i,3) || isequal(i,4) %cricket points only
-%         GoodFrames = pValues > pThresh; 
-%     else
-        GoodFrames = pValues > pThresh; 
-%     end
-    [newGoodFrames] = RemoveSpuriousGoodFrames(GoodFrames); x = find(newGoodFrames); 
-%     x = find(GoodFrames);
-
-    PoorFrames = ones(size(pValues)); PoorFrames(x) = 0;
-    xq = find(PoorFrames);
+    GoodFrames = pValues > pThresh;
+    [newGoodFrames] = RemoveSpuriousGoodFrames(GoodFrames); 
+    x = find(newGoodFrames);
     
     %Interpolate:
+    PoorFrames = ones(size(pValues)); PoorFrames(x) = 0;
+    xq = find(PoorFrames);
     vq1 = [];
     newpts = resizedXY;
     for k = 1:2 %X and Y
         v = resizedXY(:,k);
         v = v(x);
-        try %sometime there are not good frames, which causes an error
+        try %sometimes there aren't good frames, which causes an error
             vq1(:,k) = interp1(x,v,xq);
             newpts(xq,k) = vq1(:,k);
         catch
         end
     end
     resizedXY = newpts;
-    
+
     %Smoothing:
 %     resizedXYsmthBig(:,1) = smooth(resizedXY(:,1),SmoothValue,'loess');
 %     resizedXYsmthBig(:,2) = smooth(resizedXY(:,2),SmoothValue,'loess');
 % % % % %     figure; plot(resizedXY); hold on; plot(resizedXYsmthBig); title('Smoothed 300');hold on;   
 %     resizedXY = resizedXYsmthBig;
+
     newXYP = [resizedXY,s1.t{:,i}(:,3)];
     s1.t{:,i} = newXYP;
 end
@@ -161,19 +189,20 @@ s1.Circ.diameter = s1.Circ.radius*2;
 s1.Circ.conversion = (24/(s1.Circ.diameter))*2.54; %24 in arena and 2.54cm/in
 
 %Clean up cricket
-if isequal(length(varargin),4)
-    CricketIndices = varargin{4};
-    Distance = GetDistance(s1.t{:,CricketIndices(1)}(:,1:2),s1.t{:,CricketIndices(2)}(:,1:2),s1.Circ.conversion); 
+if gt(length(varargin),2)
+    CricketTableIndices = varargin{3};
+    CricketFrameRange = varargin{4};
+    Distance = GetDistance(s1.t{:,CricketTableIndices(1)}(:,1:2),s1.t{:,CricketTableIndices(2)}(:,1:2),s1.Circ.conversion); 
     
     GoodFrames = Distance < 2.5; %Cricket size in cm
     x = find(GoodFrames);
-    PoorFrames = ones(size(s1.t{:,CricketIndices(1)}(:,1))); PoorFrames(x) = 0;
+    PoorFrames = ones(size(s1.t{:,CricketTableIndices(1)}(:,1))); PoorFrames(x) = 0;
     xq = find(PoorFrames);
     
-    for i = 1:length(CricketIndices)
+    for i = 1:length(CricketTableIndices)
         %Interpolate:
         vq1 = [];
-        newpts = s1.t{:,CricketIndices(i)}(:,1:2);
+        newpts = s1.t{:,CricketTableIndices(i)}(:,1:2);
         for k = 1:2 %X and Y
             v = newpts(:,k);
             v = v(x);
@@ -185,9 +214,9 @@ if isequal(length(varargin),4)
         end
     %     figure; plot(resizedXY(:,1)); hold on; plot(resizedXY(:,2)); plot(newpts(:,1)); plot(newpts(:,2));
         resizedXY = newpts;
-
-        newXYP = [resizedXY,s1.t{:,CricketIndices(i)}(:,3)];
-        s1.t{:,CricketIndices(i)} = newXYP;
+        [resizedXY] = ClipMetricNaN(resizedXY,CricketFrameRange(1),CricketFrameRange(2));
+        newXYP = [resizedXY,s1.t{:,CricketTableIndices(i)}(:,3)];
+        s1.t{:,CricketTableIndices(i)} = newXYP;
     end
 end
 
@@ -239,18 +268,30 @@ for i = 1:length(x)
     end
 end
 end
-function [s1] = FitCircle(s1,SkyVideo,SkySize)
-try
-    test = dir('Circ*.mat');
-    load(test(1).name);
-    Circ.center = flipYcoordinate(Circ.center',SkySize);
-    Circ.input = flipYcoordinate(Circ.input,SkySize);
-catch
-    FitCircleGUI(SkyVideo,SkySize);
-    test = dir('Circ*.mat');
-    load(test(1).name);
-    Circ.center = flipYcoordinate(Circ.center',SkySize);
-    Circ.input = flipYcoordinate(Circ.input,SkySize);
+function [s1] = SmoothPoints(varargin)
+s1 = varargin{1}; PointsToSmooth = varargin{2}; SmoothValue = varargin{3};
+for i = PointsToSmooth
+    if isequal(length(varargin),4)
+        FrameRange = varargin{4};
+        pts = s1.t{:,i}(FrameRange(1):FrameRange(2),1:2);
+    else
+        pts = s1.t{:,i}(:,1:2);
+    end
+    
+    %Smoothing:
+    SmoothedPts(:,1) = smooth(pts(:,1),SmoothValue,'loess');
+    SmoothedPts(:,2) = smooth(pts(:,2),SmoothValue,'loess');
+	%figure; plot(resizedXY); hold on; plot(resizedXYsmthBig); title('Smoothed 300');hold on;   
+    
+    if isequal(length(varargin),4)
+        s1.t{:,i}(FrameRange(1):FrameRange(2),1:2) = SmoothedPts;
+    else
+        s1.t{:,i}(:,1:2) = SmoothedPts;
+    end
 end
-s1.Circ = Circ;
+end
+function [skysavename] = GetIDstring(Sky)
+skysavename = strsplit(Sky.vid.name,'Sky_');
+skysavename = strsplit(skysavename{2},'.mp4');
+skysavename = skysavename{1};
 end

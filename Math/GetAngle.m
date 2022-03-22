@@ -23,12 +23,12 @@ function [Angle] = GetAngle(centerXYpt,refXYpt,measureXYpt)
     end
 
 %Then do the actual calculation:
-    n1 = (measureXYpt - centerXYpt) / norm(measureXYpt - centerXYpt);  %Normalized vector1
-    n2 = (refXYpt - centerXYpt) / norm(refXYpt - centerXYpt); %Normalized vector2
+    n1 = (measureXYpt - centerXYpt) / normNaN(measureXYpt - centerXYpt);  %Normalized vector1
+    n2 = (refXYpt - centerXYpt) / normNaN(refXYpt - centerXYpt); %Normalized vector2
     
     Angle = zeros(size(measureXYpt,1),1);
     for i = 1:MaxMeasure
-        Angle(i,1) = atan2(norm(det([n2(i,:); n1(i,:)])), dot(n1(i,:), n2(i,:)));
+        Angle(i,1) = atan2(normNaN(det([n2(i,:); n1(i,:)])), dot(n1(i,:), n2(i,:)));
     end
 
 %Lastly, determine if the angle is to the right(1) or left(0)
@@ -43,4 +43,9 @@ function [Angle] = GetAngle(centerXYpt,refXYpt,measureXYpt)
 %and make the left angle values negative:
     negative = find(polarity==0);
     Angle(negative) = Angle(negative)*-1;
+end
+
+function [output] = normNaN(input)
+Idx = ~isnan(input(:,1));
+output = norm(input(Idx(:),:));
 end
