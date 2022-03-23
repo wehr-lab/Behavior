@@ -1,8 +1,12 @@
 %Example script plotting spiketimes, pupildiameter, and SCTs:
+%run this from within a bonsai data folder
+
 test = dir('beh*.mat'); load(test.name);
 load('AssimilationWO.mat');
-load(strcat(Sky.ephysfolder,'\notebook.mat'));
-load(strcat(Sky.ephysfolder,'\SortedUnits.mat')');
+notefilename=strcat(Sky.ephysfolder,'\notebook.mat');
+load(macifypath(notefilename, 'rig1'));
+SortedUnitsfilename=strcat(Sky.ephysfolder,'\SortedUnits.mat');
+load(macifypath(SortedUnitsfilename, 'rig1'));
 
 %% Original Plot:
 allspiketimes = [];
@@ -15,6 +19,7 @@ for cellnumber = 1:length(units)
 end
 PD = (Reye.PupilDiameter(Reye.TTs(1):Reye.TTs(end)));
 % subplot(2,1,1);
+figure
 PupilDiameter = plot(PD,'.','DisplayName','PupilDiameter','MarkerSize',5); hold on
 grid on;
 xticks(0:60*60:length(PD)); xt = xticks;
