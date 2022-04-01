@@ -6,18 +6,19 @@ function [SortedUnitsFile] = ProcessSpikes(EphysPath,LocalDataRoot)
 load(fullfile(EphysPath,'dirs.mat'));
 BonsaiAndDirname = erase(EphysPath,{LocalDataRoot}); %Bdir and dir
     test = strrep(BonsaiAndDirname,'\','SplitString');
-    test = strrep(test,'/','SplitString'); %forward slash if unix
+    test = strrep(BonsaiAndDirname,'/','SplitString');
     test = strsplit(test,'SplitString');
-BdirName = test{1}; %name of Bonsai folder
-dirName = test{2}; %name of Ephys folder
+BdirName = strsplit(BonsaiAndDirname,{DataRoot}); %name of Bonsai folder
+dirName = erase(EphysPath,{LocalDataRoot,BdirName,'\','/'}); %name of Ephys folder
 
-TestPath = strrep(EphysPath,LocalDataRoot,DataRoot);
-currentdir_indx=find(strcmp(TestPath, dirs)==1); %which dir are we trying to plot?
+
+MasterDir = replace(dirs{1},DataRoot,LocalDataRoot); %The path to the master ephys folder
+dirName = erase(EphysPath,{LocalDataRoot,BdirName,'\','/'}); %name of Ephys folder
+currentdir_indx=find(strcmp(EphysPath, dirs)==1); %which dir are we trying to plot?
 if currentdir_indx==0
     error('This directory cannot be found on the list of clustered directories. \n Either this data has not been clustered or something bad happened')
 end
 
-MasterDir = replace(dirs{1},DataRoot,LocalDataRoot); %The path to the master ephys folder
 if ismac MasterDir=macifypath(MasterDir);end
 sp = loadKSdir(MasterDir);
 

@@ -11,22 +11,10 @@ Rig = 'Rig2old'; %string indicating the rig these experiments were run on
 load('Bdirs.mat'); %This file contains the paths to all the experiment folders that were kilosorted together
 
 %% Process the spikes:
-MasterDir = replace(dirs{1},DataRoot,LocalDataRoot); %The path to the master ephys folder
 for idx = 1:length(Bdirs) %For each bonsai folder
 
-    [SortedUnits,sampleRate] = ProcessSpikes(idx,MasterDir); %Process the spikes
-    CurrentDir = replace(dirs{idx},DataRoot,LocalDataRoot); %path to Ephys folder
-    BdirName = erase(Bdirs{idx},{DataRoot}); %name of Bonsai folder
-    dirName = erase(CurrentDir,{LocalDataRoot,BdirName,'\','/'}); %name of Ephys folder
-    for unit = 1:length(SortedUnits)
-        SortedUnits(unit).dir_indx = idx;
-        SortedUnits(unit).Bdir = BdirName;
-        SortedUnits(unit).dir = dirName;
-        SortedUnits(unit).ProcessSpikesDataRoot = LocalDataRoot; %DataRoot of where ProcessSpikes was just ran
-        SortedUnits(unit).KilosortedDataRoot = DataRoot; %DataRoot of where kilosort was ran
-    end
-    savename = strcat('SortedUnits_',BdirName,'.mat');
-    save(fullfile(CurrentDir,savename), 'SortedUnits', 'sampleRate'); %Saves SortedUnits & sampleRate as 'SortedUnits.mat' in the ephys folder
+    EphysPath = replace(dirs{idx},DataRoot,LocalDataRoot); %path to Ephys folder
+    [SortedUnitsFile] = ProcessSpikes(EphysPath,LocalDataRoot); %Process the spikes
 
 end
 
@@ -42,7 +30,7 @@ for idx = 1:length(Bdirs) %For each bonsai folder
         [Reye] = ProcessPupil(Reye,0.8); %Calculate the pupil diameter
         save(BehaviorFile, 'Head', 'Reye', 'Sky'); %And save the info back into the behaviorfile
     end
-    
+
 end
 
 
