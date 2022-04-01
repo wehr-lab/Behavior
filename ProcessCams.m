@@ -1,4 +1,11 @@
 function [BehaviorFile] = ProcessCams(varargin)
+
+% This function will save a .mat file named 'Behavior_mouse-ID##_YYYY-MM-DDTHH_MM_SS'.
+% The file contains a matlab structure for each camera used in the experiment.
+% Each structure contains all the important information for the specific camera.
+% If DLC has been run for a specific camera, ProcessCams will save the data 
+% in the camera's structure.
+        
 %Input1:
     %For Rig2 before blackfly: 'Rig2old'
     %For Rig2 after blackfly: 'Rig2'
@@ -142,6 +149,7 @@ Sky.csv = dir('Sky_m*.csv');
         testing = strsplit(test(k).name,'_mouse-');
         if length(testing) > 1 %then it is a folder with '_mouse-' in its name, so it's almost certainly the OE folder...
             ephysfolder = strcat(test(k).folder,'\',test(k).name);
+            ephysfolderName = test(k).name;
         end
     end
     try
@@ -149,7 +157,11 @@ Sky.csv = dir('Sky_m*.csv');
     catch
         Sky.ephysfolder = []; %no ephys folder found for this experiment
     end
-    
+    [Sky.DataRoot,Sky.BdirName,~] = fileparts(pwd);
+    Sky.DataRoot = strcat(Sky.DataRoot,'\');
+    if ~isempty(Sky.ephysfolder)
+        Sky.dirName = ephysfolderName;
+    end
 end
 function [video] = GetAnalogVideo(varargin) %Returns a structure with video information
 CamName = varargin{1}; TrueTrigTimes = varargin{2};
@@ -254,7 +266,26 @@ video.csv = dir(csvsearch); %timestamps from bonsai
 %             [Sky] = readmaDLCOutput(Sky);
         [video] = readfDLCOutput(video);
     end
-    
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Add in path to ephys folder
+    test = dir(); narrowdown = find([test.isdir]); %identifies folders present in our main experiment folder
+    for k = narrowdown
+        testing = strsplit(test(k).name,'_mouse-');
+        if length(testing) > 1 %then it is a folder with '_mouse-' in its name, so it's almost certainly the OE folder...
+            ephysfolder = strcat(test(k).folder,'\',test(k).name);
+            ephysfolderName = test(k).name;
+        end
+    end
+    try
+        video.ephysfolder = ephysfolder;
+    catch
+        video.ephysfolder = []; %no ephys folder found for this experiment
+    end
+    [video.DataRoot,video.BdirName,~] = fileparts(pwd);
+    video.DataRoot = strcat(video.DataRoot,'\');
+    if ~isempty(video.ephysfolder)
+        video.dirName = ephysfolderName;
+    end
 end
 
 function [outputstructure] = readDLCOutput(inputstructure) %detects the unique points tracked and integrates them into the camera's matlab structure
@@ -427,6 +458,7 @@ Sky.csv = dir('Sky_*.csv');
         testing = strsplit(test(k).name,'_mouse-');
         if length(testing) > 1 %then it is a folder with '_mouse-' in its name, so it's almost certainly the OE folder...
             ephysfolder = strcat(test(k).folder,'\',test(k).name);
+            ephysfolderName = test(k).name;
         end
     end
     try
@@ -434,5 +466,9 @@ Sky.csv = dir('Sky_*.csv');
     catch
         Sky.ephysfolder = []; %no ephys folder found for this experiment
     end
-    
+    [Sky.DataRoot,Sky.BdirName,~] = fileparts(pwd);
+    Sky.DataRoot = strcat(Sky.DataRoot,'\');
+    if ~isempty(Sky.ephysfolder)
+        Sky.dirName = ephysfolderName;
+    end
 end

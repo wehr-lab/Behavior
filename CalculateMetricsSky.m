@@ -59,6 +59,8 @@ Circ = varargin{5}; ArenaCenter = [Circ.center(1),Circ.center(2)]; conversion = 
     out.CrickTheta = CrickTheta;
     out.MCangle = MCangle;
     out.MusBearing = MusBearing;
+    dMusBearing(abs(dMusBearing)>20)=0;
+    out.dMusBearing = dMusBearing;
 
 %% Optionally save the strucure as a CSV table:
     if gt(length(varargin),5)
