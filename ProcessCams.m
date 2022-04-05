@@ -5,6 +5,8 @@ function [BehaviorFile] = ProcessCams(varargin)
 % Each structure contains all the important information for the specific camera.
 % If DLC has been run for a specific camera, ProcessCams will save the data 
 % in the camera's structure.
+%
+% This function must be run in the bonsai directory you want to process
         
 %Input1:
     %For Rig2 before blackfly: 'Rig2old'
@@ -377,7 +379,7 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
     end
     obj = VideoReader(Sky.vid.name);
     Sky.vid.framerate = obj.FrameRate;
-Sky.csv = dir('Sky_*.csv');
+    Sky.csv = dir('Sky_*.csv');
     if length(Sky.csv) > 1
         for i = 1:length(Sky.csv)
             if length(Sky.csv(i).name) == 32

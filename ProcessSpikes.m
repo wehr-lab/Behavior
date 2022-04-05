@@ -19,7 +19,9 @@ end
 
 MasterDir = replace(dirs{1},DataRoot,LocalDataRoot); %The path to the master ephys folder
 if ismac MasterDir=macifypath(MasterDir);end
-sp = loadKSdir(MasterDir);
+sp = loadKSdir(MasterDir); 
+%LoadKSdir is from the "spikes" repository https://github.com/cortex-lab/spikes
+% which in turn requires the npy-matlab repository https://github.com/kwikteam/npy-matlab
 
 %These two lines adapted from: https://groups.google.com/forum/?utm_medium=email&utm_source=footer#!msg/phy-users/Ydu1etOXwF0/-vEM9Rx_BgAJ
 tempChannelAmps = squeeze(max(sp.temps,[],2))-squeeze(min(sp.temps,[],2)); % amplitude of each template on each channel, size nTemplates x nChannels
