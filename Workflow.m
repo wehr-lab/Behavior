@@ -33,6 +33,12 @@ for idx = 1:length(Bdirs) %For each bonsai folder
 
 end
 
+%% Example plot of spiketimes and corresponding pupil traces:
+%(overlaying the pupil traces like this is not really an informative plot,
+%but should be a decent example at least...)
+BonsaiDir = replace(Bdirs{2},DataRoot,LocalDataRoot);
+EphysDir = replace(dirs{2},DataRoot,LocalDataRoot);
+[fig] = PlotPupil(BonsaiDir,EphysDir);
 
 % Pre-processing Workflow:
 % 1) DLC tracking:
