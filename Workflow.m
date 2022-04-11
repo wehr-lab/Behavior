@@ -4,7 +4,7 @@
 % folders to process them all together:
 
 %% Inputs:
-LocalDataRoot = 'E:\NickNick\'; %your local path to where all the experiment folders are
+LocalDataRoot = '\\ion-nas.uoregon.edu\wehrlab\Rig2\maddie\'; %your local path to where all the experiment folders are
 Rig = 'Rig2old'; %string indicating the rig these experiments were run on
 
 %% Load the paths of the experiment folders:

@@ -473,4 +473,90 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
     if ~isempty(Sky.ephysfolder)
         Sky.dirName = ephysfolderName;
     end
+
+    %%%%%% Resolving potential mismatches between SCT and Events:
+    notebookfile = fullfile(Sky.ephysfolder,'notebook.mat'); load(notebookfile);
+    if ~isequal(Sky.NumberOfTrigs,length(stimlog)) %If the number of Sky.TTs doesnt match the number of SCTs
+        currentdir = pwd; cd(Sky.ephysfolder)
+            [~,~,~,chans.sampleRate,Events,~] = LoadExperiment();
+            chans.start = Events(1).soundcard_trigger_timestamp_sec*chans.sampleRate;
+            chans.stop = Events(end).soundcard_trigger_timestamp_sec*chans.sampleRate;
+            [rawdata, ~, ~] = load_open_ephys_data(dir('*X1.continuous').name);
+            chans.Length = length(rawdata); clear rawdata;
+            cd(currentdir);
+        [Sky] = FixMissingTTLs(Sky,Events,chans); %Essentially assimilates the events using the first and last trigger and "corrects" Sky.TTs and associated fields
+    end
+    %%%%%%
+end
+
+function [Sky] = FixMissingTTLs(Sky,Events,chans)
+
+for idx = 1:length(Events) %Get the OpenEphys sample for each event
+    EventSamples(idx) = round(Events(idx).soundcard_trigger_timestamp_sec*chans.sampleRate);
+end
+
+[OutputIndices] = ThisToThat_Lite(EventSamples,Events,Sky); %Get the corresponding Sky frame for each event
+
+% "Correct" Sky.TTs and associated fields:
+Sky.BrokenTTs = Sky.TTs;
+Sky.TTs = OutputIndices';
+Sky.TTtimes = Sky.times(Sky.TTs,1); %timestamps for each trigger
+Sky.NumberOfTrigs = length(Sky.TTs); %number of triggers detected
+
+end
+function [OutputIndices] = ThisToThat_Lite(InputEventIndex,Events,Sky) %Run in either the bonsai folder, or it's OE folder]
+%%%%% get position between trigs:
+if ~isnan(Events(1).soundcard_trigger_timestamp_sec) %default to using the SCTs
+    Trig1_in = (Events(1).soundcard_trigger_timestamp_sec)*30000;
+    Trig2_in = (Events(end).soundcard_trigger_timestamp_sec)*30000;
+    [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+else %but use the events if SCTs not recorded (GetEventsAndSCT_Timestamps will warn you in this case)
+    Trig1_in = (Events(1).message_timestamp_samples);
+    Trig2_in = (Events(end).message_timestamp_samples);
+    [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in);
+end
+%%%%%% find equivalent sample between trigs, add offset by trig1 %%%%%%%
+%     Trig1_out = Sky.TTtimes(1);
+%     Trig2_out = Sky.TTtimes(end);
+%     [IdealTime] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+%     [OutputIndices] = Time2Index(IdealTime, Sky);
+
+    Trig1_out = Sky.TTs(1);
+    Trig2_out = Sky.TTs(end);
+    [OutputIndices] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out);
+    OutputIndices = round(OutputIndices);
+%     [OutputIndices] = Time2Index(IdealTime, Sky);
+
+function [TrigRatio] = GetTrigRatio(InputEventIndex,Trig1_in,Trig2_in)
+    TSBTinput = (Trig2_in)-(Trig1_in); %TotalSamplesBetweenTrigs
+        for i = 1:length(InputEventIndex)
+            TrigRatio(i) = (InputEventIndex(i)-Trig1_in(1))/(TSBTinput);
+        end
+end
+function [OutputIndex] = GetOutputIndex(TrigRatio,Trig1_out,Trig2_out)
+    TSBToutput = (Trig2_out)-(Trig1_out); %TotalSamplesBetweenTrigs
+        for i = 1:length(TrigRatio)
+            OutputIndex(i) = (TSBToutput*TrigRatio(i))+(Trig1_out);
+        end
+end
+function [OutputIndex] = Time2Index(IdealTime, Sky)
+    if isequal(IdealTime, 1)
+    for i = 1:length(IdealTime)
+        [~, OutputIndex(i)] = min(abs(Sky.times-IdealTime(i)));
+    end
+else
+    [SortedIdealTime,Idx] = sort(IdealTime);
+    i1 =1;
+    for i = 1:length(SortedIdealTime)
+        while (Sky.times(i1)-SortedIdealTime(i))<0
+            i1=i1+1;
+        end
+        [~,x] = min(abs(Sky.times(i1-1:i1)-SortedIdealTime(i)));
+        OutputIndex(i) =  i1+x-2;
+        i1 = i1-1;
+    end
+    newInd(Idx) = 1:length(IdealTime);
+    OutputIndex = OutputIndex(newInd);
+end
+end
 end
