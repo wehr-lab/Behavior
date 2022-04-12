@@ -378,7 +378,16 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
         end
     end
     obj = VideoReader(Sky.vid.name);
-    Sky.vid.framerate = obj.FrameRate;
+    try
+    Sky.vid.framerate = obj.FrameRate; 
+    catch
+        %on a mac, some bonsai mp4s cannot be read because of an invalid
+        %audio codec. So we can use a system call to ffprobe to get the
+        %framerate (which is all we need)
+        [status, framerate]=system('/usr/local/bin/ffprobe -v error -select_streams v -of default=noprint_wrappers=1:nokey=1 -show_entries stream=r_frame_rate Reye_mouse-0877_2022-02-16T10_08_03.mp4')
+        Sky.vid.framerate=str2num(strtok(framerate, '/'));
+
+    end
     Sky.csv = dir('Sky_*.csv');
     if length(Sky.csv) > 1
         for i = 1:length(Sky.csv)

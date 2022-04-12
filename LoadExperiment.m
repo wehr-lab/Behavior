@@ -1,4 +1,5 @@
 function [nb,stimlog,messages,sampleRate,Events,StartAcquisitionSec] = LoadExperiment()
+%needs to be run from within the openephys data directory
 
 try
     load notebook.mat 
@@ -21,9 +22,14 @@ end
 [all_channels_data, all_channels_timestamps, all_channels_info] = load_open_ephys_data('all_channels.events');
 sampleRate = all_channels_info.header.sampleRate; %in Hz
 
-%get Events and soundcard trigger timestamps 
-[Events, StartAcquisitionSec] = GetEventsAndSCT_Timestamps(messages, sampleRate, all_channels_timestamps, all_channels_data, all_channels_info, stimlog);
-close;
+%get Events and soundcard trigger timestamps
+try
+    load('Events.mat');
+    load('StartAcquisitionSec');
+catch
+    [Events, StartAcquisitionSec] = GetEventsAndSCT_Timestamps(messages, sampleRate, all_channels_timestamps, all_channels_data, all_channels_info, stimlog);
+    close;
+end
 %Events.message_timestamp_sec = Events.message_timestamp_sec+StartAcquisitionSec;
 %there are some general notes on the format of Events and network messages in help GetEventsAndSCT_Timestamps
 
