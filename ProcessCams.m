@@ -384,7 +384,7 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
         %on a mac, some bonsai mp4s cannot be read because of an invalid
         %audio codec. So we can use a system call to ffprobe to get the
         %framerate (which is all we need)
-        [status, framerate]=system('/usr/local/bin/ffprobe -v error -select_streams v -of default=noprint_wrappers=1:nokey=1 -show_entries stream=r_frame_rate Reye_mouse-0877_2022-02-16T10_08_03.mp4')
+        [status, framerate]=system(sprintf('/usr/local/bin/ffprobe -v error -select_streams v -of default=noprint_wrappers=1:nokey=1 -show_entries stream=r_frame_rate %s', Sky.vid.name))
         Sky.vid.framerate=str2num(strtok(framerate, '/'));
 
     end
