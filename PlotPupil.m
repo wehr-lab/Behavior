@@ -1,19 +1,28 @@
-%Example function plotting spiketimes, pupildiameter and SCT:
 
-function PlotPupil(BonsaiDir,EphysDir)
+function PlotPupil(BonsaiDir)
+%Example function for loading, aligning, and plotting spiketimes, pupildiameter, and stimuli
+%inputs:
+% Bonsai data directory (which contains videos and an ephys data directory)
+
+
 %% 1) load the data files for the trial:
 
 BehaviorFileStr = strcat(BonsaiDir, filesep, 'Beh*.mat');
 BehaviorFile = strcat(BonsaiDir,filesep,dir(BehaviorFileStr).name);
-load(BehaviorFile);
+load(BehaviorFile); 
+
+EphysDir=extractAfter(Sky.ephysfolder, Sky.BdirName);
+EphysDir=erase(EphysDir, '\');
+EphysDir=erase(EphysDir, '/');
+EphysDir=fullfile(BonsaiDir, EphysDir);
 
 SortedUnitsFileStr = strcat(EphysDir,filesep,'Sort*.mat');
 SortedUnitsFile = strcat(EphysDir,filesep,dir(SortedUnitsFileStr).name);
 load(SortedUnitsFile);
-notebookfile = fullfile(EphysDir,'notebook.mat');
-load(notebookfile);
 numcells=length(SortedUnits);
 
+notebookfile = fullfile(EphysDir,'notebook.mat');
+load(notebookfile);
 Eventsfile = fullfile(EphysDir,'Events.mat');
 load(Eventsfile);
 StartAcquisitionSecfile = fullfile(EphysDir,'StartAcquisitionSec.mat');
@@ -25,7 +34,7 @@ xlimits = [-500,500]; %time window in ms for extracting spikes, relative to stim
 for idx=1:length(Events)
     if strcmp(Events(idx).type, 'tone') || strcmp(Events(idx).type, 'whitenoise') || strcmp(Events(idx).type, 'silentsound')
         if isfield(Events(idx), 'soundcard_trigger_timestamp_sec')
-            pos = Events(idx).soundcard_trigger_timestamp_sec*sampleRate();
+            pos = Events(idx).soundcard_trigger_timestamp_sec*sampleRate; %in this example we compute everything in OpenEphys samples (alternatively you could do it in seconds)
         else
             error('stimulus delivery timestamp missing')
         end
@@ -53,7 +62,7 @@ for idx=1:length(Events)
         end
 
         %Get pupil diameter values within this range:
-        data(idx).PD = (Reye.PupilDiameter(data(idx).ReyeStart:data(idx).ReyeStop));
+        data(idx).PupilDiameter = Reye.PupilDiameter(data(idx).ReyeStart:data(idx).ReyeStop);
 
         %store xlimits time window
         data(idx).xlimits_ms=xlimits;
@@ -61,13 +70,13 @@ for idx=1:length(Events)
     end
 end
 
-%% 3) example plotting of all cells and stimuli
+%% 3) Example plotting of all cells and stimuli together
 
 figure
 hold on
 
 %Align pupil (in frames of Reye camera clock) to openephys (OE) recording clock
-ReyeFirst = Reye.TTs(1); %anchor at first and last stimuli
+ReyeFirst = Reye.TTs(1); %anchor at first and last stimuli, interpolate between them
 ReyeLast = Reye.TTs(end);
 OEfirst = Events(1).soundcard_trigger_timestamp_sec;
 OElast = Events(end).soundcard_trigger_timestamp_sec;
@@ -75,18 +84,36 @@ m=(OElast-OEfirst)/(ReyeLast-ReyeFirst);
 b=OEfirst - m*ReyeFirst;
 numPupilFrames=length(Reye.PupilDiameter);
 f=1:numPupilFrames;
-tp(f)=m*f + b; %tp is the (interpolated) time in seconds on OE recording clock of each Reye camera frame
+tpupil(f)=m*f + b; %tpupil is the (interpolated) time in seconds on OE recording clock of each Reye camera frame
 
-plot(tp, Reye.PupilDiameter, 'b', 'linewid', 2)
-
+plot(tpupil, Reye.PupilDiameter, 'b', 'linewid', 2)
 yl=ylim;
 offset=yl(2);
+
+cmap=jet(32);
+for e=1:length(Events)
+    stimtime=Events(e).soundcard_trigger_timestamp_sec;
+    if strcmp(Events(e).type, 'tone') 
+        c=ceil(Events(e).frequency/1000);
+    elseif strcmp(Events(e).type, 'whitenoise')
+        c=1;
+    elseif strcmp(Events(e).type, 'silentsound')
+        c=3;
+    end
+    h=plot(stimtime, offset, 'o'); %plot an o for each stimulus onset, color-coded by frequency
+    set(h, 'color', cmap(c,:))
+end
+
 for i=1:numcells
     [firingrate, t]=hist(SortedUnits(i).spiketimes, 0:1:seconds(Sky.dur)); %bin firing rates in 1 second bins
     plot(t, firingrate+offset) %t is in seconds in the openephys reference frame
     offset=offset+20;
 end
 ylabel('pupil diam (pixels) and firing rate (Hz)')
+xlabel('time, s')
+%this is a 30-minute recording so you'll want to zoom in
+
+
 
 %% 4) Example plotting of a specific stimulus and cellnumber
 stimtype='tone';
@@ -94,10 +121,10 @@ freq=2000;
 cellnumber = 1;
 % This function overlays pupil traces and spike rasters for all repetitions
 % of a given stimulus, aligned to stimulus onset
-PlotPupilSingle(data,stimtype,freq, cellnumber,sampleRate);
+PlotPupilSingle(data,stimtype,freq, cellnumber,sampleRate); %see subfunction below
 
 
-end
+end %end of PlotPupil function
 
     function PlotPupilSingle(data,stimtype,freq, cellnumber,sampleRate)
     indices = [];
@@ -109,14 +136,16 @@ end
 
     Colors = cool(120);
     figure;
-    subplot(2,1,1); title([stimtype, ', ', int2str(freq), 'Hz, color:mean pupil diam']); hold on;
+    %plot pupil diameter on each trial of the requested type, within the
+    %xlimits requested above, aligned to stimulus onset
+    subplot(2,1,1); title([stimtype, ', ', int2str(freq), 'Hz, color=mean pupil diam']); hold on;
     plot([30,30],[0,120],'k--');
     for idx=indices
-        ColorValue(idx) = round(mean(data(idx).PD(:)));
+        ColorValue(idx) = round(mean(data(idx).PupilDiameter(:))); %color-code spikes and pupil traces for mean pupil diam on that trial
         if isnan(ColorValue(idx))
             ColorValue(idx) = 1;
         end
-        PupilDiameter = plot(data(idx).PD(:),'-','Color',Colors(ColorValue(idx),:),'DisplayName','PupilDiameter','MarkerSize',5);
+        PupilDiameter = plot(data(idx).PupilDiameter(:),'-','Color',Colors(ColorValue(idx),:),'DisplayName','PupilDiameter','MarkerSize',5);
     end
     %ylim([0,120]); 
     xlim([0, diff(data(1).xlimits_frames)]);
@@ -125,6 +154,8 @@ end
     ylabel('Pupil Diameter (pixels)');
     xlabel('time, ms')
 
+    %plot spiketrains on each trial of the requested type, within the
+    %xlimits requested above, for the requested cell, aligned to stimulus onset
     k = 1;
     subplot(2,1,2); hold on
     plot([0,0],[0,length(indices)],'k--')
