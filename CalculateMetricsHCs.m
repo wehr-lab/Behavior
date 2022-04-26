@@ -16,9 +16,9 @@ load(filename);
         [RearBearing,vRearBearing,dvRearBearing] = GetAngVelAcl(r1.rearorigin(:,1:2),r1.rearorigin(:,1:2)+[0,-1],r1.t.post2(:,1:2),AnalogFs);
 
 %This puts angles of ears into protraction and retraction:
-%         RearBearing = RearBearing*-1; 
-%         vRearBearing = vRearBearing*-1;
-%         dvRearBearing = dvRearBearing*-1;
+        RearBearing = RearBearing*-1; 
+        vRearBearing = vRearBearing*-1;
+        dvRearBearing = dvRearBearing*-1;
     
     %%Package outHCs structure:
     outHCs.LearBearing = LearBearing;
