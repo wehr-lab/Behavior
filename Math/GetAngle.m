@@ -46,6 +46,7 @@ function [Angle] = GetAngle(centerXYpt,refXYpt,measureXYpt)
 end
 
 function [output] = normNaN(input)
-Idx = ~isnan(input(:,1));
-output = norm(input(Idx(:),:));
+% Idx = ~isnan(input(:,1));
+% output = norm(input(Idx(:),:));
+output = norm(input(~isnan(input)));
 end

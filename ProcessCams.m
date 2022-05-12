@@ -91,8 +91,8 @@ Sky.csv = dir('Sky_m*.csv');
         try
             Sky.times = Sky.times(1:Sky.length);
         catch
-            flagVariable = Sky;
-            save('Flag_discordant.mat','flagVariable');
+%             flagVariable = Sky;
+%             save('Flag_discordant.mat','flagVariable');
         end
     end
     Sky.TTL = dir('TTL_m*.csv'); Sky.TTL = textscan(fopen(Sky.TTL.name),'%q'); Sky.TTL = Sky.TTL{1,1};
@@ -243,8 +243,8 @@ video.csv = dir(csvsearch); %timestamps from bonsai
         try
             video.times = video.times(1:video.length);
         catch
-            flagVariable = video;
-            save('Flag_discordant.mat','flagVariable');
+%             flagVariable = video;
+%             save('Flag_discordant.mat','flagVariable');
 %             video.length = length(video.times);
         end
     end
@@ -409,8 +409,8 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
         try
             Sky.times = Sky.times(1:Sky.length);
         catch
-            flagVariable = Sky;
-            save('Flag_discordant.mat','flagVariable');
+%             flagVariable = Sky;
+%             save('Flag_discordant.mat','flagVariable');
         end
     end
     Sky.TTL = dir('TTL_*.csv'); Sky.TTL = textscan(fopen(Sky.TTL.name),'%q'); Sky.TTL = Sky.TTL{1,1};

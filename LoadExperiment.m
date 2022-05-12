@@ -19,7 +19,7 @@ end
 
 [messages] = GetNetworkEvents('messages.events');
 
-[all_channels_data, all_channels_timestamps, all_channels_info] = load_open_ephys_data('all_channels.events');
+[all_channels_data, all_channels_timestamps, all_channels_info] = load_open_ephys_data_faster('all_channels.events');
 sampleRate = all_channels_info.header.sampleRate; %in Hz
 
 %get Events and soundcard trigger timestamps

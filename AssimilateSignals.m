@@ -61,7 +61,8 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     if ismac ephysfolder=macifypath(ephysfolder);end
     cd(ephysfolder); %then go to the ephys folder
     try
-        load('SortedUnits.mat'); %spiketimes, in seconds after start of acquisition of this trial
+        test = dir('SortedUnits*.mat');
+        load(test.name); %spiketimes, in seconds after start of acquisition of this trial
         for i = 1:length(SortedUnits) %for each unit
             units(i).name = SortedUnits(i).cellnum; %CellID for each sorted unit
             units(i).spiketimes = SortedUnits(i).spiketimes; %spiketimes for this trial, in seconds after the start of acquisition for this trial
@@ -90,16 +91,23 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     chans(3).file = strcat(Sky.ephysfolder,'\',Header,'_AUX3.continuous');
     
     for i = 1:length(chans)
+        chans(i).start = OEstart;
+        chans(i).stop  = OEstop;
         if isequal(i,1)
-            [rawdata, ~, info] = load_open_ephys_data(chans(1).file); 
-            chans(i).Length = length(rawdata); clear rawdata;
+            [rawdata, ~, info] = load_open_ephys_data_faster(chans(1).file); 
+            chans(i).Length = length(rawdata);
             chans(i).sampleRate = info.header.sampleRate;
+            [~,Xdata_1K] = AlignedResampling(rawdata,chans(i).sampleRate,1000); clear rawdata;
+            chans(i).X1K = length(Xdata_1K); clear Xdata_1K;
+            chans(i).X1Kstart = (chans(i).start/chans(i).Length)*chans(i).X1K;
+            chans(i).X1Kstop = (chans(i).stop/chans(i).Length)*chans(i).X1K;
         else
             chans(i).Length = chans(1).Length;
             chans(i).sampleRate = chans(1).sampleRate;
+            chans(i).X1K = chans(1).X1K;
+            chans(i).X1Kstart = chans(1).X1Kstart;
+            chans(i).X1Kstop = chans(1).X1Kstop;
         end
-        chans(i).start = OEstart;
-        chans(i).stop  = OEstop;
     end
     %% return to bonsai folder
     skyvidfolder=Sky.vid.folder;
