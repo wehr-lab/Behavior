@@ -1,5 +1,7 @@
 %Example script showing where to load spike waveforms from a sorted unit. Run in a masterdir folder
-clear;
+clear chanMap channel channumber ChosenCluster clu connected fpass fs i k...
+    kcoords mmf nSpikesToPlot nWFsamps nWFsToLoad rez sampleRate SortedUnits...
+    sp st temp tempWF TetrodeWaveforms theseST theseWF titlestring TTchannels waveform waveforms wfWin xcoords ycoords;
 
 %% Get sorted data from masterdir
 load rez.mat; 
@@ -10,8 +12,8 @@ mmf = memmapfile(sp.dat_path, 'Format', {sp.dtype, [sp.n_channels_dat, rez.ops.r
 
 %% Load sortedunits and declare a unit
 load('SortedUnits.mat')
-ChosenCluster = SortedUnits(1).cluster; %choose a cluster (I just hardcoded the first one as an example here)
-channel = SortedUnits(1).channel;
+ChosenCluster = SortedUnits(1186).cluster; %choose a cluster (I just hardcoded the first one as an example here)
+channel = SortedUnits(1186).channel;
 
 %% Load channel map and find the other 3 channels for this tetrode
 load chanMap.mat;
