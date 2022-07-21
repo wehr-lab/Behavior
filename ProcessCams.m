@@ -490,7 +490,8 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
             [~,~,~,chans.sampleRate,Events,~] = LoadExperiment();
             chans.start = Events(1).soundcard_trigger_timestamp_sec*chans.sampleRate;
             chans.stop = Events(end).soundcard_trigger_timestamp_sec*chans.sampleRate;
-            [rawdata, ~, ~] = load_open_ephys_data(dir('*X1.continuous').name);
+            curr_aux1_chan = dir('*X1.continuous');
+            [rawdata, ~, ~] = load_open_ephys_data(curr_aux1_chan.name);
             chans.Length = length(rawdata); clear rawdata;
             cd(currentdir);
         [Sky] = FixMissingTTLs(Sky,Events,chans); %Essentially assimilates the events using the first and last trigger and "corrects" Sky.TTs and associated fields
