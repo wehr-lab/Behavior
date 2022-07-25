@@ -70,6 +70,7 @@ Sky.vid = dir('Sky_m*.mp4'); %raw video from bonsai
     end
     obj = VideoReader(Sky.vid.name);
     Sky.vid.framerate = obj.FrameRate;
+    Sky.vid.size = [obj.Width,obj.Height];
 Sky.csv = dir('Sky_m*.csv');
     if length(Sky.csv) > 1
         for i = 1:length(Sky.csv)
@@ -184,6 +185,7 @@ video.vid = dir(vidsearch);
     end
     obj = VideoReader(video.vid.name);
     video.vid.framerate = obj.FrameRate;
+    video.vid.size = [obj.Width,obj.Height];
 csvsearch = strcat(CamName,'_m*.csv');
 video.csv = dir(csvsearch); %timestamps from bonsai
     if length(video.csv) < 1
@@ -380,6 +382,7 @@ Sky.vid = dir('Sky_*.mp4'); %raw video from bonsai
     obj = VideoReader(Sky.vid.name);
     try
     Sky.vid.framerate = obj.FrameRate; 
+    Sky.vid.size = [obj.Width,obj.Height];
     catch
         %on a mac, some bonsai mp4s cannot be read because of an invalid
         %audio codec. So we can use a system call to ffprobe to get the
