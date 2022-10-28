@@ -25,14 +25,14 @@ VideoFs = round(Sky.vid.framerate);
     [MusSpeedPOL,out.MusVor,MusAor] = GetPolarSpdVelAcl(MusSpeedPoint,conversion,VideoFs,Circ.center);
     
 %% Calculate cricket metrics if it's a PC trial:
-if isfield(Sky.Events,'TerminalCap')
-    LF = Sky.Events.TerminalCap;
-else
-    LF = length(Cricket);
-end
-if isfield(Sky.Events,'Land') %if it's a PC trial
-    FF = Sky.Events.Land;
-    
+if isfield(Sky.Events,'Land') %it's a PC trial
+    FF = 1;%Sky.Events.Land;
+    if isfield(Sky.Events,'TerminalCap')
+        LF = length(Cricket);%Sky.Events.TerminalCap;
+    else
+        LF = length(Cricket);
+    end
+
     [CrickThigmo] = GetDistance(Cricket,ArenaCenter,conversion); 
         [out.CrickThigmo] = ClipMetricNaN(CrickThigmo,FF,LF);
     [CrickTheta] = GetAngVelAcl(ArenaCenter,ArenaCenter+[0,1],Cricket,VideoFs); 
@@ -47,31 +47,45 @@ if isfield(Sky.Events,'Land') %if it's a PC trial
         [CrickAor] = ClipMetricNaN(CrickAor,FF,LF);
 
 %% Calculate mouse-cricket metrics:
-    [Crange] = GetDistance(MusHeadBack,Cricket,conversion);
-        [out.Crange] = ClipMetricNaN(Crange,FF,LF);
+    [Range] = GetDistance(MusHeadBack,Cricket,conversion);
+        [out.Range] = ClipMetricNaN(Range,FF,LF);
+    
+    [RangeMidpt] = GetMidpoints(MusHeadBack,Cricket);
+        [out.RangeMidpt] = ClipMetricNaN(RangeMidpt,FF,LF);
+    [RangeTheta,RangeRho] = cart2pol(RangeMidpt(:,1),RangeMidpt(:,2));
+        [out.RangeTheta] = ClipMetricNaN(RangeTheta,FF,LF);
+        RangeRho = RangeRho*conversion;
+        [out.RangeRho] = ClipMetricNaN(RangeRho,FF,LF);
+    
+    [RangePhi] = GetAngVelAcl(RangeMidpt,ArenaCenter,MusHeadBack,VideoFs); 
+        [out.RangePhi] = ClipMetricNaN(RangePhi,FF,LF);
+    [RangePhiXY] = GetAngVelAcl(RangeMidpt,RangeMidpt+[0,1],MusHeadBack,VideoFs); 
+        [out.RangePhiXY] = ClipMetricNaN(RangePhiXY,FF,LF);
+
     [Azi,dAzi,~] = GetAngVelAcl(MusHeadBack,MusHeadFront,Cricket,VideoFs);
         [out.Azi] = ClipMetricNaN(Azi,FF,LF);
-        [dAzi] = ClipMetricNaN(dAzi,FF,LF);
+        %[dAzi] = ClipMetricNaN(dAzi,FF,LF);
     [MCangle] = GetAngle(ArenaCenter,MusHeadBack,Cricket);
         [out.MCangle] = ClipMetricNaN(MCangle,FF,LF);
 
+end
 %% Optionally save the strucure as a CSV table:
-    if gt(length(varargin),6)
-        skysaveID = varargin{6};
-        if ischar(skysaveID)
-            outSky = out;
-            savename = strcat('outSky_',skysaveID,'.csv');
-            Struct2CSV(outSky,savename);
-        elseif isstruct(skysaveID)
-            outSky = out;
-            savename = strcat(skysaveID.path,'\outSky_',skysaveID.string,'.csv');
-            Struct2CSV(outSky,savename);
-        else %if it's anything other than a string or struct
-            outSky = out;
-            Struct2CSV(outSky,'outSky.csv');
-        end
+if gt(length(varargin),6)
+    skysaveID = varargin{6};
+    if ischar(skysaveID)
+        outSky = out;
+        savename = strcat('outSky_',skysaveID,'.csv');
+        Struct2CSV(outSky,savename);
+    elseif isstruct(skysaveID)
+        outSky = out;
+        savename = strcat(skysaveID.path,'\outSky_',skysaveID.string,'.csv');
+        Struct2CSV(outSky,savename);
+    else %if it's anything other than a string or struct
+        outSky = out;
+        Struct2CSV(outSky,'outSky.csv');
     end
 end
+
 
 % Function key:
 % [midpoint] = GetMidpoints(XYpt1,XYpt2); %output = XYpt
