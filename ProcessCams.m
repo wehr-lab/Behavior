@@ -35,9 +35,9 @@ end
 
 %% Step2: Save the camera structures in a .mat file named 'Behavior_mouse-IDnm_YYYY-MM-DDTHH_MM_SS.mat'
 try
-    BehaviorFile = strcat(pwd,'\Behavior', Sky.vid.name(4:34),'.mat');
+    BehaviorFile = strcat(pwd, filesep, 'Behavior', Sky.vid.name(4:34),'.mat');
 catch %Rig2old
-    BehaviorFile = strcat(pwd,'\Behavior_mouse-', Sky.vid.name(5:28),'.mat'); 
+    BehaviorFile = strcat(pwd,filesep,'Behavior_mouse-', Sky.vid.name(5:28),'.mat'); 
 end
 
 if nargin>=1

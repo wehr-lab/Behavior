@@ -4,8 +4,16 @@ obj = []; fig = figure;
 for idx = 1:length(statestruct)
     trial = statestruct(idx).trial;
     framerange = statestruct(idx).framerange;
-    [obj] = PlotStateTracksSingle(df(trial).dsWO,framerange,ptParam,obj);
-end
+    if isfield(df(trial), 'dsWO')
+        [obj] = PlotStateTracksSingle(df(trial).dsWO,framerange,ptParam,obj);
+    elseif isfield(df(trial), 'data')
+        if ~isempty(framerange)
+        [obj] = PlotStateTracksSingle(df(trial).data,framerange,ptParam,obj);
+        end
+    else
+        error('cannot find either dsWO or data field in dataFrame')
+    end
+    end
 
 end
 
