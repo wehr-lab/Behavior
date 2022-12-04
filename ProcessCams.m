@@ -346,6 +346,11 @@ function [outputstructure] = readmaDLCOutput(inputstructure) %detects the unique
     numberofpoints = (length(titles))/3;        %number of unique points tracked
     u = unique(titles); %the names of each unique point tracked
     
+    %the below snippet assumes body parts are not repeated across
+    %individuals (e.g. for mouse and cricket)
+    %     if instead we have 2 mice with the same body parts, we have to re-use
+    %     those body part names mw 12.4.22
+if numberofpoints==length(u)
     %This snippet identifies the X,Y,&P values in the csv for each unique tracked point in the csv file
     for i = 1:numberofpoints
         columnIdx = [];
@@ -361,7 +366,23 @@ function [outputstructure] = readmaDLCOutput(inputstructure) %detects the unique
         inputstructure.madlc.(char(name)) = dlmread(inputstructure.madlc.csv.name,',',[4,columns{2,i}(1),numberofframes+3,columns{2,i}(end)]);
     end
     %End of snippet
-    
+
+else %numberofpoints may exceed number of unique titles 
+    for i = 1:numberofpoints
+        columnIdx = [];
+        for ii = 1:length(titles)
+            columnIdx = [columnIdx;isequal(titles(i),{titles{ii}})];
+        end
+        columns{1,i} = titles(i);
+        columns{2,i} = find(columnIdx);
+    end
+    numberofframes = length(inputstructure.madlc.raw)-4;
+    for i = 1:numberofpoints
+        name = string(columns{1,i});
+        inputstructure.madlc.(char(name)) = dlmread(inputstructure.madlc.csv.name,',',[4,columns{2,i}(1),numberofframes+3,columns{2,i}(end)]);
+    end
+end
+
     inputstructure.numberofpoints = numberofpoints;
     outputstructure = inputstructure;
 end
