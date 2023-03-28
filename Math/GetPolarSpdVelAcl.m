@@ -14,6 +14,6 @@ Thaccl = (diff(Thvel));
 Rhaccl = (diff(Rhvel));
 pAcl = [Thaccl,Rhaccl];
 
-Spd = [nan;Spd];
-pAcl = [nan,nan;pAcl];
+Spd = [Spd;nan];
+pAcl = [pAcl;nan,nan];
 end

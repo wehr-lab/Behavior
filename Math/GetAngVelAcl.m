@@ -5,13 +5,14 @@ function [Ang,aVel,aAcl] = GetAngVelAcl(centerXYpt,refXYpt,measureXYpt,VideoFs)
 %Next, calculate angular velocity (the change in radians/second) (1/s)
     uAng = unwrap(Ang);
     aVel = nan(size(Ang));
-    aVel(2:end) = diff(uAng);
+    aVel(1:end-1) = diff(uAng); %aVel(2:end) = diff(uAng);
+
 %     CompassJumps = gt(abs(aVel),pi); %detect cases where the change in angle appears to be greater than half a rotation
 %     aVel(CompassJumps) = (2*pi)-abs(aVel(CompassJumps)); %correct these cases to the smaller alternative angle (ex: +179 to -179 should be 2, not -358)
     aVel = aVel*VideoFs;
 
 %Lastly, calculate angular acceleration (the change in the change in radians/second) (1/s*s)
     aAcl = nan(size(aVel));
-    aAcl(2:end) = diff(aVel);
+    aAcl(1:end-1) = diff(aVel); %aAcl(2:end) = diff(aVel);
     aAcl = aAcl*VideoFs;
 end

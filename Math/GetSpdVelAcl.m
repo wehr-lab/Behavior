@@ -9,8 +9,8 @@ Xaccl = (diff(Xvel));
 Yaccl = (diff(Yvel)); 
 Acl = [Xaccl,Yaccl];
 
-%append nans at beginnings:
-Spd = [nan;Spd];
-Vel = [nan,nan;Vel];
-Acl = [nan,nan;nan,nan;Acl];
+%append nans at end:
+Spd = [Spd;nan]; %Spd = [nan;Spd];
+Vel = [Vel;nan,nan]; %Vel = [nan,nan;Vel];
+Acl = [Acl;nan,nan;nan,nan]; %Acl = [nan,nan;nan,nan;Acl];
 end
