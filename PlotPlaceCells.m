@@ -1,6 +1,6 @@
 %% load the assimilation and behavior file
 clear all; close all;
-load('Assimilation.mat');
+%load('Assimilation.mat');
 behaviorfile = dir('Behavior*.mat').name;
 load(behaviorfile);
 

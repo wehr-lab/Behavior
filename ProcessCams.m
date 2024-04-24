@@ -81,11 +81,17 @@ Sky.csv = dir('Sky_m*.csv');
         end
     end
     Sky.times = textscan(fopen(Sky.csv.name),'%q'); Sky.times = Sky.times{1,1};
-    Sky.times = Sky.times(2:2:end,:); Sky.times = cell2mat(Sky.times); Sky.times = Sky.times(:,1:27);
+    %Nick's original way
+    % Sky.times = Sky.times(2:2:end,:); Sky.times = cell2mat(Sky.times); Sky.times = Sky.times(:,1:27);
+    %Mike's new way, 4.24.2024
+    Sky.times = cell2mat(Sky.times);
+    Sky.times = Sky.times(:,18:end-6);
+
     Sky.length = length(Sky.times);
     for i=1:Sky.length
         Sky.times(i,:) = strrep(Sky.times(i,:),'T','_');
     end
+
     Sky.times = datetime(Sky.times, 'Format','yyyy-MM-dd_HH:mm:ss.SSSSSSS');
     if ~isequal(Sky.length,obj.NumberOfFrames)
         Sky.length = obj.NumberOfFrames;
