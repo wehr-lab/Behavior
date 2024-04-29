@@ -40,6 +40,8 @@ catch %Rig2old
     BehaviorFile = strcat(pwd,filesep,'Behavior_mouse-', Sky.vid.name(5:28),'.mat'); 
 end
 
+Sky = AddOEinfo(Sky); %mw 10.6.23
+
 if nargin>=1
     if isequal(varargin{1},'Rig2')
         save(BehaviorFile,'Sky','Head','Reye');
@@ -55,6 +57,26 @@ end
 end
 
 %%%%%%%%%%%% Functions %%%%%%%%%%%%
+
+function Sky = AddOEinfo(Sky)
+% manually add ephysfolders and other openephys info to Sky
+%this is saved in a OEinfo-*.mat file in the Bonsai directory by  social_approach_messing_around
+%mw 10.5.23
+OEinfodir=dir('OEinfo-*.mat');
+OEinfofilename=OEinfodir.name;
+load(OEinfofilename)
+Sky.EphysPath=EphysPath;
+Sky.EphysPath_KS=EphysPath_KS;
+Sky.ephysfolder=EphysPath_KS;
+Sky.BonsaiPath=BonsaiPath;
+Sky.OEversion=OEversion;
+Sky.messages=messages;
+Sky.OEsamplerate=OEsamplerate;
+Sky.numsoundcardtriggers=numsoundcardtriggers;
+Sky.TTL=TTL;
+
+end
+
 function [Sky] = GetSkyVideo(varargin) %Returns a structure with video information
 Sky.vid = dir('Sky_m*.mp4'); %raw video from bonsai
     if length(Sky.vid) < 1
@@ -167,7 +189,7 @@ Sky.csv = dir('Sky_m*.csv');
         Sky.ephysfolder = []; %no ephys folder found for this experiment
     end
     [Sky.DataRoot,Sky.BdirName,~] = fileparts(pwd);
-    Sky.DataRoot = strcat(Sky.DataRoot,'\');
+    Sky.DataRoot = strcat(Sky.DataRoot,filesep);
     if ~isempty(Sky.ephysfolder)
         Sky.dirName = ephysfolderName;
     end

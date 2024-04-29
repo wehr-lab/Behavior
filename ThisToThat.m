@@ -23,19 +23,24 @@ disp('done')
 
 %check OpenEphys version and look for files in the appropriate places
 %mike 9.2023
+%is OEversion > 0.6.0?
+isnewOEversion=0;
 if isfield(Sky, 'OEversion')
     OEversion=Sky.OEversion;
+    if compare_versions(OEversion, '0.6.0');
+        isnewOEversion=1;
+    end
 else
-    OEversion='old';
+    isnewOEversion=0;
 end
-switch OEversion
-    case '0.6.4' %as we upgrade OE further, we should split on . and use str2num to do numeric comparison
+
+if isnewOEversion
        
         [~,~,~,~,Events,~] = LoadExperiment2(Sky); %and get Events
         cd(currentdir); %cd back to whichever directory we started in
 
-    case 'old'
-        BonsaiPath=Sky.BdirName;
+else %is old OE version
+    BonsaiPath=Sky.BdirName;
         ephysfolder=Sky.ephysfolder;
         if ismac ephysfolder=macifypath(ephysfolder);end
         cd(BonsaiPath)
@@ -43,8 +48,6 @@ switch OEversion
         [~,~,~,~,Events,~] = LoadExperiment(Sky); %and get Events
         cd(currentdir); %cd back to whichever directory we started in
 
-    otherwise
-        error('could not determine OpenEphys version, need to update this code')
 end
 
 

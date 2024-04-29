@@ -1,24 +1,62 @@
-function [SortedUnitsFile] = ProcessSpikes(EphysPath,LocalDataRoot)
+function [SortedUnitsFile] = ProcessSpikes(varargin)
+%load kilosorted spiking data and put into SortedUnits structure and write to SortedUnits.mat file
+%usage: 
+% [SortedUnitsFile] = ProcessSpikes(EphysPath,LocalDataRoot) (works for older data format with earlier versions of open ephys and kilosort
+% [SortedUnitsFile] = ProcessSpikes(BonsaiPath, EphysPath_KS, EphysPath, LocalDataRoot) (new data format with new versions of open ephys and kilosort
+%
+% in the new OE format, I think it only makes sense to call ProcessSpikes
+% on the EphysPath_KS pointing to the MasterDir
 
-%Input = Ephys directory
-%output = fn for sorted units
 
-load(fullfile(EphysPath,'dirs.mat'));
-BonsaiAndDirname = erase(EphysPath,{LocalDataRoot}); %Bdir and dir
-    test = strrep(BonsaiAndDirname,'\','SplitString');
-    test = strrep(test,'/','SplitString'); %forward slash if unix
-    test = strsplit(test,'SplitString');
-BdirName = test{1}; %name of Bonsai folder
-dirName = test{2}; %name of Ephys folder
+switch nargin
+    case 2 %old way
+        EphysPath=varargin{1};
+        LocalDataRoot=varargin{2};
+        BonsaiAndDirname = erase(EphysPath,{LocalDataRoot}); %Bdir and dir
+        test = strrep(BonsaiAndDirname,'\','SplitString');
+        test = strrep(test,'/','SplitString'); %forward slash if unix
+        test = strsplit(test,'SplitString');
+        BdirName = test{1}; %name of Bonsai folder
+        dirName = test{2}; %name of Ephys folder
 
-TestPath = strrep(EphysPath,LocalDataRoot,DataRoot);
-currentdir_indx=find(strcmp(TestPath, dirs)==1); %which dir are we trying to plot?
-if currentdir_indx==0
-    error('This directory cannot be found on the list of clustered directories. \n Either this data has not been clustered or something bad happened')
+        TestPath = strrep(EphysPath,LocalDataRoot,DataRoot);
+        currentdir_indx=find(strcmp(TestPath, dirs)==1); %which dir are we trying to plot?
+        if currentdir_indx==0
+            error('This directory cannot be found on the list of clustered directories. \n Either this data has not been clustered or something bad happened')
+        end
+
+        try
+            load(fullfile(EphysPath,'dirs.mat'));
+        catch
+            try
+                [tempEphysPath,~,~]=fileparts(EphysPath);
+                load(fullfile(tempEphysPath,'dirs.mat'));
+            catch
+                error('Could not find dirs.mat. Please call SettingYourStage to select the data directories from this session which will create bdirs and dirs .mat files')
+            end
+        end
+        MasterDir = replace(dirs{1},DataRoot,LocalDataRoot); %The path to the master ephys folder
+        if ismac MasterDir=macifypath(MasterDir);end
+
+    case 4 %new way
+
+        BonsaiPath=varargin{1};
+        EphysPath_KS=varargin{2};
+        EphysPath=varargin{3};
+        LocalDataRoot=varargin{4};
+        DataRoot=LocalDataRoot; % maybe we need to extract DataRoot from dirs? It comes into play if we are calling ProcessSpikes on a different machine from where dirs was created
+        load(fullfile(BonsaiPath, EphysPath,'dirs.mat'));
+        MasterDir = EphysPath_KS; %The path to the master ephys KS folder
+        if ismac MasterDir=macifypath(MasterDir);end
+        currentdir_indx=strcmp(fullfile(BonsaiPath,EphysPath), dirs); %which dir are we trying to plot?
+        BdirName=BonsaiPath;
+        dirName=EphysPath;
 end
 
-MasterDir = replace(dirs{1},DataRoot,LocalDataRoot); %The path to the master ephys folder
-if ismac MasterDir=macifypath(MasterDir);end
+
+
+
+
 sp = loadKSdir(MasterDir); 
 %LoadKSdir is from the "spikes" repository https://github.com/cortex-lab/spikes
 % which in turn requires the npy-matlab repository https://github.com/kwikteam/npy-matlab
@@ -80,10 +118,18 @@ for unit = 1:length(SortedUnits)
     SortedUnits(unit).ProcessSpikesDataRoot = LocalDataRoot; %DataRoot of where ProcessSpikes was just ran
     SortedUnits(unit).KilosortedDataRoot = DataRoot; %DataRoot of where kilosort was ran
 end
-savename = strcat('SortedUnits_',BdirName,'.mat');
-SortedUnitsFile = fullfile(EphysPath,savename);
-save(SortedUnitsFile, 'SortedUnits', 'sampleRate'); %Saves SortedUnits & sampleRate as 'SortedUnits.mat' in the ephys folder
+switch nargin
+    case 2 %old way
 
+        savename = strcat('SortedUnits_',BdirName,'.mat');
+        SortedUnitsFile = fullfile(EphysPath,savename);
+        save(SortedUnitsFile, 'SortedUnits', 'sampleRate'); %Saves SortedUnits & sampleRate as 'SortedUnits.mat' in the ephys folder
+    case 4 %new way
+                savename = strcat('SortedUnits_',EphysPath,'.mat');
+        SortedUnitsFile = fullfile(BonsaiPath,EphysPath,savename);
+        save(SortedUnitsFile, 'SortedUnits', 'sampleRate'); %Saves SortedUnits & sampleRate as 'SortedUnits.mat' in the ephys folder
+
+end
 end
 
 
