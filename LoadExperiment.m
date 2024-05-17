@@ -2,7 +2,7 @@ function [nb,stimlog,messages,sampleRate,Events,StartAcquisitionSec] = LoadExper
 %needs to be run from within the openephys data directory
 
 try
-    load notebook.mat 
+    load notebook.mat
     if ~exist('stimlog','var') %check if stimlog is actually there
         stimlog=[];
         fprintf('\nfound notebook file but there was no stimlog in it!!!');

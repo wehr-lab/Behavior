@@ -48,7 +48,7 @@ switch nargin
         load(fullfile(BonsaiPath, EphysPath,'dirs.mat'));
         MasterDir = EphysPath_KS; %The path to the master ephys KS folder
         if ismac MasterDir=macifypath(MasterDir);end
-        currentdir_indx=strcmp(fullfile(BonsaiPath,EphysPath), dirs); %which dir are we trying to plot?
+        currentdir_indx=find(strcmp(fullfile(BonsaiPath,EphysPath), dirs)); %which dir are we trying to plot?
         BdirName=BonsaiPath;
         dirName=EphysPath;
 end

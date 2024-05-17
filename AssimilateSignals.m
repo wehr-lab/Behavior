@@ -1,4 +1,9 @@
-function [vids,units,chans] = AssimilateSignals(varargin) %run in bonsai folder
+function [vids,units,chans] = AssimilateSignals(varargin) 
+%run in bonsai folder
+%what are the inputs?
+%usage: [vids,units,chans] = AssimilateSignals() %defaults to segment in time between first and last trigger
+%usage: [vids,units,chans] = AssimilateSignals([SkyStart], [SkyStop]) %to specify a custom analysis range
+
 behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     
 %% set range of analysis
@@ -59,8 +64,8 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
     
     ephysfolder=Sky.ephysfolder;
     if ismac ephysfolder=macifypath(ephysfolder);end
-    cd(ephysfolder); %then go to the ephys folder
     try
+        cd(ephysfolder); %then go to the ephys folder. This is EphysPath_KS where the kilosorted data is expected. If kilosort has not been run, it will be empty.
         test = dir('SortedUnits*.mat');
         load(test.name); %spiketimes, in seconds after start of acquisition of this trial
         for i = 1:length(SortedUnits) %for each unit
@@ -80,6 +85,7 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
         %ProcessSpikes
     end
     
+    try %need to figure out how to load open ephys data for version 0.6 -mike 9.2023
 %% declare Continuous traces & calculate ranges
 	%First 3 are always the accelerometer traces
     Header = dir('*_AUX1.continuous'); Header = strsplit(Header.name,'_'); Header = Header{1};
@@ -109,6 +115,7 @@ behaviorfile = dir('Beh*.mat'); load(behaviorfile.name); %loads behavior file
             chans(i).X1Kstop = chans(1).X1Kstop;
         end
     end
+    end %try
     %% return to bonsai folder
     skyvidfolder=Sky.vid.folder;
     if ismac skyvidfolder=macifypath(skyvidfolder);end
