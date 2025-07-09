@@ -6,7 +6,8 @@ function [SortedUnitsFile] = ProcessSpikes(varargin)
 %
 % in the new OE format, I think it only makes sense to call ProcessSpikes
 % on the EphysPath_KS pointing to the MasterDir
-
+%
+% spiketimes are in seconds
 
 switch nargin
     case 2 %old way
@@ -47,7 +48,7 @@ switch nargin
         DataRoot=LocalDataRoot; % maybe we need to extract DataRoot from dirs? It comes into play if we are calling ProcessSpikes on a different machine from where dirs was created
         load(fullfile(BonsaiPath, EphysPath,'dirs.mat'));
         MasterDir = EphysPath_KS; %The path to the master ephys KS folder
-        if ismac MasterDir=macifypath(MasterDir);end
+        if ismac & ~isempty(MasterDir) MasterDir=macifypath(MasterDir);end
         currentdir_indx=find(strcmp(fullfile(BonsaiPath,EphysPath), dirs)); %which dir are we trying to plot?
         BdirName=BonsaiPath;
         dirName=EphysPath;
