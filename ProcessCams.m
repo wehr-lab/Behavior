@@ -93,7 +93,7 @@ Sky.vid = dir('Sky_m*.mp4'); %raw video from bonsai
     obj = VideoReader(Sky.vid.name);
     Sky.vid.framerate = obj.FrameRate;
     Sky.vid.size = [obj.Width,obj.Height];
-Sky.csv = dir('Sky_m*.csv');
+    Sky.csv = dir('Sky_m*.csv');
     if length(Sky.csv) > 1
         for i = 1:length(Sky.csv)
             if length(Sky.csv(i).name) == 38
@@ -102,20 +102,36 @@ Sky.csv = dir('Sky_m*.csv');
             end
         end
     end
-    Sky.times = textscan(fopen(Sky.csv.name),'%q'); Sky.times = Sky.times{1,1};
+    Sky.times = textscan(fopen(Sky.csv.name),'%q'); 
+    Sky.times = Sky.times{1,1};
+    %mike 11.10.25
+    %Bonsai csvs, e.g. Sky_mouse-3179_2025-01-27T09_04_10.csv, are an array
+    %of frame numbers and timestamps. They used to be written with a space
+    %separating them, like this: '2129680413494840 2025-01-27T09:04:11.3879936-08:00 '
+    % But at some point Bonsai switch to a comma, like this:   '6509744929697624,2025-10-21T18:38:58.8197632-07:00'
+    %so we have to determine which separator is used and split accordingly
+
+    if length(Sky.times{1})==length(Sky.times{2})
+        %rows are equal, so there's 1 comma-separated row per frame
+        Sky.times  = cell2mat(Sky.times);
+        Sky.length = length(Sky.times);
+        for i=1:Sky.length
+            tmp(i,:)= extractAfter(Sky.times(i,:), ',');
+        end
+        Sky.times=tmp;
+    else
+        %rows are different, so there's a frame on odd rows and timestamp on even rows
+        Sky.times = Sky.times(2:2:end,:);
+        Sky.times  = cell2mat(Sky.times);
+        Sky.length = length(Sky.times);
+    end
+
     %Nick's original way
     % Sky.times = Sky.times(2:2:end,:); Sky.times = cell2mat(Sky.times); Sky.times = Sky.times(:,1:27);
-    %Mike's new way, 4.24.2024
-    % Sky.times = cell2mat(Sky.times);
-    % %Sky.times = Sky.times(:,18:end-6);
-    %wow this is super brittle. Let's see if I can do it more robustly by
-    %finding and splitting at the comma
-    Sky.times  = cell2mat(Sky.times);
-   Sky.length = length(Sky.times);
-    for i=1:Sky.length
-        tmp(i,:)= extractAfter(Sky.times(i,:), ',');
-    end
-    Sky.times=tmp;
+    %Mike's new way, 4.24.2024 - do it more robustly by
+    %finding and splitting at the comma, but it only worked when Bonsai
+    %used  a comma. So I updated it above (11.10.25) 
+
 
     for i=1:Sky.length
         Sky.times(i,:) = strrep(Sky.times(i,:),'T','_');
